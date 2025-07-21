@@ -74,6 +74,11 @@ app.use('/api/candidates', candidateRoutes);
 
 // Root endpoint
 console.log('Registering route: /');
+app.get('/', (req, res) => {
+  res.json({
+    message: 'SMOCCE 2025 Backend API',
+    version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
     endpoints: {
       health: '/health',
       auth: '/api/auth',
@@ -85,6 +90,7 @@ console.log('Registering route: /');
 });
 
 // 404 handler
+console.log('Registering route: * (404 handler)');
 app.use('*', (req, res) => {
   res.status(404).json({
     error: 'Endpoint not found',
