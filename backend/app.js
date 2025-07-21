@@ -8,7 +8,20 @@ const voteRoutes = require('./routes/vote');
 const adminRoutes = require('./routes/admin');
 const candidateRoutes = require('./routes/candidates');
 
+
 const app = express();
+
+// Global logging for all app.use calls to debug invalid path registration
+const originalAppUse = app.use;
+app.use = function(...args) {
+  // Only log if first arg is string or undefined/null
+  if (typeof args[0] === 'string' || args[0] == null) {
+    console.log('app.use called with:', args[0]);
+  } else {
+    console.log('app.use called with non-string first arg:', typeof args[0]);
+  }
+  return originalAppUse.apply(this, args);
+};
 
 // CORS Configuration for Production
 const allowedOrigins = [
