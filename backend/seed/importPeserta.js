@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 const xlsx = require('xlsx');
 require('dotenv').config();
-const User = require('../models/user');
+const User = require('../models/User');
 
 const importData = async () => {
   try {

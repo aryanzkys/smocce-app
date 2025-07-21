@@ -1,5 +1,5 @@
 const express = require('express');
-const User = require('../models/user');
+const User = require('../models/User');
 const Vote = require('../models/vote');
 const { getCurrentElectionPeriod, hasUserVotedInPeriod } = require('../config/election');
 
