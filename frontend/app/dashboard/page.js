@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import CandidateCard from '../../components/CandidateCard'
+import { apiService, utils } from '../../lib/api'
 
 export default function DashboardPage() {
   const router = useRouter()
@@ -13,6 +14,7 @@ export default function DashboardPage() {
 
   const [candidates, setCandidates] = useState({ ketua: [], pj: {} })
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     const saved = localStorage.getItem('user')
@@ -28,24 +30,33 @@ export default function DashboardPage() {
   const fetchElectionData = async (nisn) => {
     try {
       setLoading(true)
+      setError(null)
       
+      // Check if API is available
+      const isApiAvailable = await utils.isApiAvailable()
+      if (!isApiAvailable) {
+        throw new Error('Server tidak dapat dijangkau. Silakan coba lagi nanti.')
+      }
+
       // Fetch candidates
-      const candidatesResponse = await fetch('http://localhost:5000/api/candidates')
-      const candidatesData = await candidatesResponse.json()
+      const candidatesData = await apiService.getCandidates()
       setCandidates(candidatesData)
 
       // Fetch election status
-      const statusResponse = await fetch('http://localhost:5000/api/vote/status')
-      const statusData = await statusResponse.json()
+      const statusData = await apiService.getVoteStatus()
       setElectionStatus(statusData)
 
-      // Fetch user vote status
-      const userStatusResponse = await fetch(`http://localhost:5000/api/vote/user-status/${nisn}`)
+      // Fetch user vote status (using direct API call since it's not in apiService yet)
+      const userStatusResponse = await fetch(`${utils.getApiUrl()}/api/vote/user-status/${nisn}`)
+      if (!userStatusResponse.ok) {
+        throw new Error('Gagal mengambil status vote user')
+      }
       const userStatusData = await userStatusResponse.json()
       setUserVoteStatus(userStatusData)
 
     } catch (error) {
       console.error('Error fetching election data:', error)
+      setError(utils.formatApiError(error))
     } finally {
       setLoading(false)
     }
@@ -55,7 +66,8 @@ export default function DashboardPage() {
     if (!pjId) return
 
     try {
-      const res = await fetch('http://localhost:5000/api/vote/pj', {
+      // Using direct API call since PJ vote endpoint is not in apiService yet
+      const res = await fetch(`${utils.getApiUrl()}/api/vote/pj`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -70,11 +82,11 @@ export default function DashboardPage() {
         // Refresh data
         fetchElectionData(user.nisn)
       } else {
-        alert(data.message)
+        alert(data.message || 'Gagal menyimpan vote PJ')
       }
     } catch (error) {
       console.error('Error submitting PJ vote:', error)
-      alert('Terjadi kesalahan saat menyimpan vote')
+      alert(utils.formatApiError(error))
     }
   }
 
@@ -82,7 +94,8 @@ export default function DashboardPage() {
     if (!ketuaId) return
 
     try {
-      const res = await fetch('http://localhost:5000/api/vote/ketua', {
+      // Using direct API call since Ketua vote endpoint is not in apiService yet
+      const res = await fetch(`${utils.getApiUrl()}/api/vote/ketua`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -97,11 +110,11 @@ export default function DashboardPage() {
         localStorage.removeItem('user') // logout otomatis
         router.push('/thanks')
       } else {
-        alert(data.message)
+        alert(data.message || 'Gagal menyimpan vote Ketua')
       }
     } catch (error) {
       console.error('Error submitting Ketua vote:', error)
-      alert('Terjadi kesalahan saat menyimpan vote')
+      alert(utils.formatApiError(error))
     }
   }
 
