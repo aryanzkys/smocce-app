@@ -8,7 +8,20 @@ const voteRoutes = require('./routes/vote');
 const adminRoutes = require('./routes/admin');
 const candidateRoutes = require('./routes/candidates');
 
+
 const app = express();
+
+// Global logging for all app.use calls to debug invalid path registration
+const originalAppUse = app.use;
+app.use = function(...args) {
+  // Only log if first arg is string or undefined/null
+  if (typeof args[0] === 'string' || args[0] == null) {
+    console.log('app.use called with:', args[0]);
+  } else {
+    console.log('app.use called with non-string first arg:', typeof args[0]);
+  }
+  return originalAppUse.apply(this, args);
+};
 
 // CORS Configuration for Production
 const allowedOrigins = [
@@ -16,7 +29,7 @@ const allowedOrigins = [
   'https://localhost:3000',
   process.env.CORS_ORIGIN,
   process.env.FRONTEND_URL
-].filter(Boolean);
+].filter(origin => typeof origin === 'string' && origin.trim() !== '');
 
 app.use(cors({
   origin: function (origin, callback) {
@@ -63,12 +76,17 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
+console.log('Registering route: /api/auth');
 app.use('/api/auth', authRoutes);
+console.log('Registering route: /api/vote');
 app.use('/api/vote', voteRoutes);
+console.log('Registering route: /api/admin');
 app.use('/api/admin', adminRoutes);
+console.log('Registering route: /api/candidates');
 app.use('/api/candidates', candidateRoutes);
 
 // Root endpoint
+console.log('Registering route: /');
 app.get('/', (req, res) => {
   res.json({
     message: 'SMOCCE 2025 Backend API',
@@ -85,6 +103,7 @@ app.get('/', (req, res) => {
 });
 
 // 404 handler
+console.log('Registering route: * (404 handler)');
 app.use('*', (req, res) => {
   res.status(404).json({
     error: 'Endpoint not found',
