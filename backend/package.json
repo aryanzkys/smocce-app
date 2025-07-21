@@ -1,15 +1,30 @@
 {
-  "name": "backend",
+  "name": "smocce-backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "SMOCCE 2025 Backend API - Science Olympiad Club Chair Election System",
+  "main": "app.js",
   "scripts": {
-    "start": "nodemon app.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "node app.js",
+    "dev": "nodemon app.js",
+    "seed:candidates": "node seed/importCandidates.js",
+    "seed:users": "node seed/sampleUsers.js",
+    "seed:all": "npm run seed:candidates && npm run seed:users"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "engines": {
+    "node": ">=16.0.0",
+    "npm": ">=8.0.0"
+  },
+  "keywords": [
+    "voting",
+    "election",
+    "smocce",
+    "science-olympiad",
+    "nodejs",
+    "express",
+    "mongodb"
+  ],
+  "author": "SMOCCE 2025 Team",
+  "license": "MIT",
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
