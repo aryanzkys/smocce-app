@@ -11,7 +11,7 @@
     "seed:all": "npm run seed:candidates && npm run seed:users"
   },
   "engines": {
-    "node": ">=16.0.0",
+    "node": "18.x",
     "npm": ">=8.0.0"
   },
   "keywords": [
