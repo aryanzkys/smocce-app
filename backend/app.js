@@ -63,17 +63,17 @@ app.get('/health', (req, res) => {
 });
 
 // API Routes
+console.log('Registering route: /api/auth');
 app.use('/api/auth', authRoutes);
+console.log('Registering route: /api/vote');
 app.use('/api/vote', voteRoutes);
+console.log('Registering route: /api/admin');
 app.use('/api/admin', adminRoutes);
+console.log('Registering route: /api/candidates');
 app.use('/api/candidates', candidateRoutes);
 
 // Root endpoint
-app.get('/', (req, res) => {
-  res.json({
-    message: 'SMOCCE 2025 Backend API',
-    version: '1.0.0',
-    environment: process.env.NODE_ENV || 'development',
+console.log('Registering route: /');
     endpoints: {
       health: '/health',
       auth: '/api/auth',
