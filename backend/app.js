@@ -16,7 +16,7 @@ const allowedOrigins = [
   'https://localhost:3000',
   process.env.CORS_ORIGIN,
   process.env.FRONTEND_URL
-].filter(Boolean);
+].filter(origin => typeof origin === 'string' && origin.trim() !== '');
 
 app.use(cors({
   origin: function (origin, callback) {
