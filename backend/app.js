@@ -25,8 +25,8 @@ app.use = function(...args) {
 
 // CORS Configuration for Production
 const allowedOrigins = [
-  'http://localhost:3000',
-  'https://localhost:3000',
+  'https://smocce-app.vercel.app',
+  'https://smocce-app-git-master-aryan-zaky-prayogos-projects.vercel.app',
   process.env.CORS_ORIGIN,
   process.env.FRONTEND_URL
 ].filter(origin => typeof origin === 'string' && origin.trim() !== '');
