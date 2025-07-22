@@ -10,6 +10,12 @@ cloudinary.config({
 // Fungsi upload gambar ke Cloudinary
 const streamifier = require('streamifier');
 exports.uploadPhoto = async (req, res) => {
+  // Cek ENV terbaca/tidak
+  console.log('[CLOUDINARY ENV]', {
+    CLOUDINARY_CLOUD_NAME: process.env.CLOUDINARY_CLOUD_NAME,
+    CLOUDINARY_API_KEY: process.env.CLOUDINARY_API_KEY,
+    CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? '***' : undefined
+  });
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
