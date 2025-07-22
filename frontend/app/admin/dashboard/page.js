@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function AdminDashboard() {
+  const [showAddModal, setShowAddModal] = useState(false);
   const router = useRouter()
   const [stats, setStats] = useState(null)
   const [users, setUsers] = useState([])
