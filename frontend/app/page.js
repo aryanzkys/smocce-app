@@ -23,7 +23,7 @@ export default function Home() {
             Selamat Datang di Sistem Pemilihan SMOCCE 2025
           </h2>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Sistem pemilihan online untuk memilih Ketua Science Olympiad Club dan Penanggung Jawab Bidang
+            Sistem pemilihan online untuk memilih Ketua SMANESI Olympiad Club dan Penanggung Jawab Bidang
           </p>
         </div>
 
@@ -64,7 +64,7 @@ export default function Home() {
                 <p className="text-blue-800"><strong>Tanggal:</strong> 12 Agustus 2025</p>
                 <p className="text-blue-800"><strong>Waktu:</strong> 00:00 - 23:59 WIB</p>
                 <p className="text-sm text-blue-600">
-                  Pilih Ketua Science Olympiad Club yang akan memimpin organisasi
+                  Pilih Ketua SMANESI Olympiad Club yang akan memimpin organisasi
                 </p>
               </div>
             </div>
@@ -140,10 +140,9 @@ export default function Home() {
         {/* Footer */}
         <div className="text-center mt-12 text-gray-500">
           <p className="text-sm">
-            <strong>Demo Admin:</strong> Username: admin | Password: smocce2025
           </p>
           <p className="text-xs mt-2">
-            SMOCCE 2025 - Science Olympiad Club Election System
+            SMOCCE 2025 - SMANESI Olympiad Club Election System
           </p>
         </div>
       </div>

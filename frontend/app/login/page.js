@@ -12,7 +12,7 @@ export default function LoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    const res = await fetch('http://localhost:5000/api/auth/login', {
+    const res = await fetch('https://smocce-app-production.up.railway.app/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ nisn, token })
@@ -31,14 +31,14 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <form onSubmit={handleSubmit} className="bg-white shadow-md p-8 rounded w-full max-w-md">
-        <h1 className="text-2xl font-bold mb-6 text-center">Login SMOCCE</h1>
+        <h1 className="text-2xl font-bold mb-6 text-center text-black">Login SMOCCE</h1>
         {error && <p className="text-red-600 mb-4">{error}</p>}
         <input
           type="text"
           placeholder="Masukkan NISN"
           value={nisn}
           onChange={(e) => setNisn(e.target.value)}
-          className="w-full mb-4 p-2 border border-gray-300 rounded"
+          className="w-full mb-4 p-3 border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
         <input
@@ -46,7 +46,7 @@ export default function LoginPage() {
           placeholder="Masukkan Token"
           value={token}
           onChange={(e) => setToken(e.target.value)}
-          className="w-full mb-6 p-2 border border-gray-300 rounded"
+          className="w-full mb-6 p-3 border border-gray-300 rounded-lg text-black placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
           required
         />
         <button

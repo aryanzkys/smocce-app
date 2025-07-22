@@ -3,6 +3,57 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function AdminDashboard() {
+  // Fungsi untuk menyimpan kandidat baru
+  const handleSaveNewCandidate = async () => {
+    try {
+      const res = await fetch('https://smocce-app-production.up.railway.app/api/admin/candidates', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(candidateForm)
+      });
+      if (res.ok) {
+        alert('Kandidat berhasil ditambahkan!');
+        setShowAddModal(false);
+        setCandidateForm({
+          candidateId: '',
+          name: '',
+          type: 'ketua',
+          bidang: '',
+          photo: '',
+          vision: '',
+          mission: '',
+          experience: ''
+        });
+        fetchData && fetchData();
+      } else {
+        const data = await res.json();
+        alert('Gagal menambah kandidat: ' + (data.message || 'Unknown error'));
+      }
+    } catch (error) {
+      alert('Terjadi error saat menambah kandidat');
+    }
+  };
+  // Fungsi untuk menutup modal tambah kandidat
+  const handleCancelAdd = () => {
+    setShowAddModal(false);
+  };
+  const [showAddModal, setShowAddModal] = useState(false);
+  // Fungsi untuk membuka modal tambah kandidat
+  const handleAddCandidate = () => {
+    setCandidateForm({
+      candidateId: '',
+      name: '',
+      type: 'ketua',
+      bidang: '',
+      photo: '',
+      vision: '',
+      mission: '',
+      experience: ''
+    });
+    setShowAddModal(true);
+  }
   const router = useRouter()
   const [stats, setStats] = useState(null)
   const [users, setUsers] = useState([])
@@ -41,27 +92,27 @@ export default function AdminDashboard() {
       setLoading(true)
       
       // Fetch dashboard stats
-      const statsRes = await fetch('http://localhost:5000/api/admin/stats')
+      const statsRes = await fetch('https://smocce-app-production.up.railway.app/api/admin/stats')
       const statsData = await statsRes.json()
       setStats(statsData)
 
       // Fetch users
-      const usersRes = await fetch('http://localhost:5000/api/admin/users')
+      const usersRes = await fetch('https://smocce-app-production.up.railway.app/api/admin/users')
       const usersData = await usersRes.json()
       setUsers(usersData.users)
 
       // Fetch votes
-      const votesRes = await fetch('http://localhost:5000/api/admin/votes')
+      const votesRes = await fetch('https://smocce-app-production.up.railway.app/api/admin/votes')
       const votesData = await votesRes.json()
       setVotes(votesData.votes)
 
       // Fetch results
-      const resultsRes = await fetch('http://localhost:5000/api/admin/results')
+      const resultsRes = await fetch('https://smocce-app-production.up.railway.app/api/admin/results')
       const resultsData = await resultsRes.json()
       setResults(resultsData)
 
       // Fetch candidates
-      const candidatesRes = await fetch('http://localhost:5000/api/admin/candidates')
+      const candidatesRes = await fetch('https://smocce-app-production.up.railway.app/api/admin/candidates')
       const candidatesData = await candidatesRes.json()
       setCandidates(candidatesData)
 
@@ -81,7 +132,7 @@ export default function AdminDashboard() {
     if (!confirm(`Reset vote untuk NISN ${nisn}?`)) return
 
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/users/${nisn}/vote`, {
+      const res = await fetch(`https://smocce-app-production.up.railway.app/api/admin/users/${nisn}/vote`, {
         method: 'DELETE'
       })
       
@@ -101,7 +152,7 @@ export default function AdminDashboard() {
     if (!confirm(`Regenerate token untuk NISN ${nisn}?`)) return
 
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/users/${nisn}/token`, {
+      const res = await fetch(`https://smocce-app-production.up.railway.app/api/admin/users/${nisn}/token`, {
         method: 'PUT'
       })
       
@@ -151,7 +202,7 @@ export default function AdminDashboard() {
       }
 
       // Send to backend
-      const res = await fetch('http://localhost:5000/api/admin/import/users', {
+      const res = await fetch('https://smocce-app-production.up.railway.app/api/admin/import/users', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -234,7 +285,7 @@ export default function AdminDashboard() {
     if (!editingCandidate) return
 
     try {
-      const res = await fetch(`http://localhost:5000/api/admin/candidates/${editingCandidate.candidateId}`, {
+      const res = await fetch(`https://smocce-app-production.up.railway.app/api/admin/candidates/${editingCandidate.candidateId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json'
@@ -277,20 +328,20 @@ export default function AdminDashboard() {
 
   const exportData = async (type = 'json') => {
     try {
-      let url = 'http://localhost:5000/api/admin/export'
+      let url = 'https://smocce-app-production.up.railway.app/api/admin/export'
       let filename = `smocce-data-${new Date().toISOString().split('T')[0]}`
       
       switch (type) {
         case 'users-csv':
-          url = 'http://localhost:5000/api/admin/export/users-csv'
+          url = 'https://smocce-app-production.up.railway.app/api/admin/export/users-csv'
           filename = `data-pemilih-${new Date().toISOString().split('T')[0]}.csv`
           break
         case 'results-csv':
-          url = 'http://localhost:5000/api/admin/export/results-csv'
+          url = 'https://smocce-app-production.up.railway.app/api/admin/export/results-csv'
           filename = `hasil-voting-${new Date().toISOString().split('T')[0]}.csv`
           break
         case 'comprehensive':
-          url = 'http://localhost:5000/api/admin/export/comprehensive'
+          url = 'https://smocce-app-production.up.railway.app/api/admin/export/comprehensive'
           filename = `laporan-lengkap-${new Date().toISOString().split('T')[0]}.json`
           break
         default:
@@ -637,6 +688,14 @@ export default function AdminDashboard() {
 
         {activeTab === 'candidates' && (
           <div className="space-y-6">
+            <div className="flex justify-end">
+              <button
+                onClick={handleAddCandidate}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium mb-4"
+              >
+                + Tambah Kandidat
+              </button>
+            </div>
             {/* Ketua Candidates */}
             <div className="bg-white shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
@@ -861,8 +920,8 @@ export default function AdminDashboard() {
               <div className="mb-4 p-3 bg-gray-50 rounded">
                 <p className="text-sm text-gray-600 mb-2"><strong>Format File:</strong></p>
                 <p className="text-xs text-gray-500">
-                  File harus memiliki kolom: <strong>NISN, Bidang, Token</strong><br/>
-                  Contoh: 1234567890, Matematika, TOKEN001
+                  File harus memiliki kolom: <strong>NISN, Bidang</strong><br/>
+                  Contoh: 1234567890, Matematika
                 </p>
               </div>
 
@@ -893,6 +952,131 @@ export default function AdminDashboard() {
                   {importing ? 'Importing...' : 'Import'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Candidate Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative overflow-y-auto" style={{ maxHeight: '90vh' }}>
+            <button
+              onClick={handleCancelAdd}
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h3 className="text-xl font-semibold mb-4">Tambah Kandidat Baru</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">ID Kandidat</label>
+                <input
+                  type="text"
+                  value={candidateForm.candidateId}
+                  onChange={e => setCandidateForm({ ...candidateForm, candidateId: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Contoh: K01 atau PJ01"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Tipe Kandidat</label>
+                <select
+                  value={candidateForm.type}
+                  onChange={e => setCandidateForm({ ...candidateForm, type: e.target.value, bidang: '' })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="ketua">Ketua</option>
+                  <option value="pj">PJ</option>
+                </select>
+              </div>
+              {candidateForm.type === 'pj' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Bidang (khusus PJ)</label>
+                  <select
+                    value={candidateForm.bidang}
+                    onChange={e => setCandidateForm({ ...candidateForm, bidang: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Pilih Bidang</option>
+                    <option value="Matematika">Matematika</option>
+                    <option value="Fisika">Fisika</option>
+                    <option value="Kimia">Kimia</option>
+                    <option value="Biologi">Biologi</option>
+                    <option value="Ekonomi">Ekonomi</option>
+                    <option value="Astronomi">Astronomi</option>
+                    <option value="Kebumian">Kebumian</option>
+                    <option value="Geografi">Geografi</option>
+                    <option value="Informatika">Informatika</option>
+                  </select>
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nama Kandidat</label>
+                <input
+                  type="text"
+                  value={candidateForm.name}
+                  onChange={e => setCandidateForm({ ...candidateForm, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Masukkan nama kandidat"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">URL Foto</label>
+                <input
+                  type="text"
+                  value={candidateForm.photo}
+                  onChange={e => setCandidateForm({ ...candidateForm, photo: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://example.com/photo.jpg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Visi</label>
+                <textarea
+                  value={candidateForm.vision}
+                  onChange={e => setCandidateForm({ ...candidateForm, vision: e.target.value })}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Masukkan visi kandidat"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Misi</label>
+                <textarea
+                  value={candidateForm.mission}
+                  onChange={e => setCandidateForm({ ...candidateForm, mission: e.target.value })}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Masukkan misi kandidat"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Pengalaman</label>
+                <textarea
+                  value={candidateForm.experience}
+                  onChange={e => setCandidateForm({ ...candidateForm, experience: e.target.value })}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Masukkan pengalaman kandidat"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={handleCancelAdd}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleSaveNewCandidate}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              >
+                Simpan Kandidat
+              </button>
             </div>
           </div>
         </div>

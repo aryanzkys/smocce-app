@@ -180,7 +180,7 @@ export default function DashboardPage() {
                   <div className="flex items-center justify-between p-4 bg-white rounded-xl">
                     <div className="text-left">
                       <h4 className="font-semibold text-gray-900">Pemilihan Ketua SOC</h4>
-                      <p className="text-sm text-gray-600">Pilih Ketua Science Olympiad Club</p>
+                      <p className="text-sm text-gray-600">Pilih Ketua SMANESI Olympiad Club</p>
                     </div>
                     <div className="text-right">
                       <p className="font-bold text-indigo-600">12 Agustus 2025</p>
@@ -400,7 +400,7 @@ export default function DashboardPage() {
             <>
               <div className="text-center mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">👑 Pilih Ketua SOC</h2>
-                <p className="text-gray-600">Pilih satu kandidat yang akan memimpin Science Olympiad Club</p>
+                <p className="text-gray-600">Pilih satu kandidat yang akan memimpin SMANESI Olympiad Club</p>
               </div>
               
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
