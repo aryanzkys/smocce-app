@@ -861,8 +861,8 @@ export default function AdminDashboard() {
               <div className="mb-4 p-3 bg-gray-50 rounded">
                 <p className="text-sm text-gray-600 mb-2"><strong>Format File:</strong></p>
                 <p className="text-xs text-gray-500">
-                  File harus memiliki kolom: <strong>NISN, Bidang, Token</strong><br/>
-                  Contoh: 1234567890, Matematika, TOKEN001
+                  File harus memiliki kolom: <strong>NISN, Bidang</strong><br/>
+                  Contoh: 1234567890, Matematika
                 </p>
               </div>
 
