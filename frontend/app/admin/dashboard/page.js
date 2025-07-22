@@ -637,6 +637,14 @@ export default function AdminDashboard() {
 
         {activeTab === 'candidates' && (
           <div className="space-y-6">
+            <div className="flex justify-end">
+              <button
+                onClick={handleAddCandidate}
+                className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium mb-4"
+              >
+                + Tambah Kandidat
+              </button>
+            </div>
             {/* Ketua Candidates */}
             <div className="bg-white shadow rounded-lg">
               <div className="px-4 py-5 sm:p-6">
@@ -893,6 +901,131 @@ export default function AdminDashboard() {
                   {importing ? 'Importing...' : 'Import'}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add Candidate Modal */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-30">
+          <div className="bg-white rounded-lg shadow-lg w-full max-w-lg p-6 relative overflow-y-auto" style={{ maxHeight: '90vh' }}>
+            <button
+              onClick={handleCancelAdd}
+              className="absolute top-2 right-2 text-gray-400 hover:text-gray-600"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+            <h3 className="text-xl font-semibold mb-4">Tambah Kandidat Baru</h3>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">ID Kandidat</label>
+                <input
+                  type="text"
+                  value={candidateForm.candidateId}
+                  onChange={e => setCandidateForm({ ...candidateForm, candidateId: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Contoh: K01 atau PJ01"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Tipe Kandidat</label>
+                <select
+                  value={candidateForm.type}
+                  onChange={e => setCandidateForm({ ...candidateForm, type: e.target.value, bidang: '' })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  <option value="ketua">Ketua</option>
+                  <option value="pj">PJ</option>
+                </select>
+              </div>
+              {candidateForm.type === 'pj' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Bidang (khusus PJ)</label>
+                  <select
+                    value={candidateForm.bidang}
+                    onChange={e => setCandidateForm({ ...candidateForm, bidang: e.target.value })}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="">Pilih Bidang</option>
+                    <option value="Matematika">Matematika</option>
+                    <option value="Fisika">Fisika</option>
+                    <option value="Kimia">Kimia</option>
+                    <option value="Biologi">Biologi</option>
+                    <option value="Ekonomi">Ekonomi</option>
+                    <option value="Astronomi">Astronomi</option>
+                    <option value="Kebumian">Kebumian</option>
+                    <option value="Geografi">Geografi</option>
+                    <option value="Informatika">Informatika</option>
+                  </select>
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Nama Kandidat</label>
+                <input
+                  type="text"
+                  value={candidateForm.name}
+                  onChange={e => setCandidateForm({ ...candidateForm, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Masukkan nama kandidat"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">URL Foto</label>
+                <input
+                  type="text"
+                  value={candidateForm.photo}
+                  onChange={e => setCandidateForm({ ...candidateForm, photo: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="https://example.com/photo.jpg"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Visi</label>
+                <textarea
+                  value={candidateForm.vision}
+                  onChange={e => setCandidateForm({ ...candidateForm, vision: e.target.value })}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Masukkan visi kandidat"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Misi</label>
+                <textarea
+                  value={candidateForm.mission}
+                  onChange={e => setCandidateForm({ ...candidateForm, mission: e.target.value })}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Masukkan misi kandidat"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Pengalaman</label>
+                <textarea
+                  value={candidateForm.experience}
+                  onChange={e => setCandidateForm({ ...candidateForm, experience: e.target.value })}
+                  rows={2}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Masukkan pengalaman kandidat"
+                />
+              </div>
+            </div>
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={handleCancelAdd}
+                className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-200 rounded-md hover:bg-gray-300"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleSaveNewCandidate}
+                className="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700"
+              >
+                Simpan Kandidat
+              </button>
             </div>
           </div>
         </div>
