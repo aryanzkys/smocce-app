@@ -21,7 +21,7 @@ export default function CheckToken() {
     setResult(null)
 
     try {
-      const res = await fetch('http://localhost:5000/api/auth/check-token', {
+      const res = await fetch('https://smocce-app-production.up.railway.app/api/auth/check-token', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
