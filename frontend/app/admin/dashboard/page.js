@@ -1,8 +1,50 @@
 'use client'
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
+import CropModal from './CropModal'
 
 export default function AdminDashboard() {
+  // ...state dan handler cropping di atas...
+
+  // --- Render CropModal universal untuk tambah/edit kandidat ---
+  // (Letakkan di bawah return utama, sebelum penutup komponen)
+
+
+  // ...state dan handler cropping di atas...
+
+  // Render CropModal (universal untuk tambah/edit)
+  // Diletakkan di luar return utama agar selalu tersedia
+  // (bisa juga diletakkan di bagian bawah return utama, sebelum </div> penutup)
+
+  // State untuk cropping foto kandidat
+  const [showCropModal, setShowCropModal] = useState(false);
+  const [cropImageSrc, setCropImageSrc] = useState(null); // base64
+  const [cropTarget, setCropTarget] = useState(null); // 'add' | 'edit'
+
+  // Handler setelah crop selesai
+  const handleCropDone = async (croppedBlob) => {
+    setShowCropModal(false);
+    setCropImageSrc(null);
+    if (!croppedBlob) return;
+    // Upload hasil crop ke backend
+    const formData = new FormData();
+    formData.append('photo', croppedBlob, 'cropped.jpg');
+    try {
+      const res = await fetch('https://smocce-app-production.up.railway.app/api/upload/photo', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (res.ok && data.url) {
+        setCandidateForm((prev) => ({ ...prev, photo: data.url }));
+      } else {
+        alert('Gagal upload foto hasil crop');
+      }
+    } catch (err) {
+      alert('Error upload foto hasil crop');
+    }
+  };
+
   // Fungsi untuk menyimpan kandidat baru
   const handleSaveNewCandidate = async () => {
     try {
@@ -1128,17 +1170,27 @@ export default function AdminDashboard() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    URL Foto
-                  </label>
-                  <input
-                    type="text"
-                    value={candidateForm.photo}
-                    onChange={(e) => setCandidateForm({...candidateForm, photo: e.target.value})}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="https://example.com/photo.jpg"
-                  />
-                </div>
+  <label className="block text-sm font-medium text-gray-700 mb-2">Upload Foto</label>
+  <input
+  type="file"
+  accept="image/*"
+  onChange={e => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setCropImageSrc(reader.result);
+      setShowCropModal(true);
+      setCropTarget('edit');
+    };
+    reader.readAsDataURL(file);
+  }}
+  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+/>
+{candidateForm.photo && (
+  <img src={candidateForm.photo} alt="Preview Foto" className="mt-2 h-24 rounded shadow" />
+)}
+</div>
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1198,6 +1250,13 @@ export default function AdminDashboard() {
           </div>
         </div>
       )}
-    </div>
-  )
+    {/* CropModal universal untuk tambah/edit kandidat */}
+    <CropModal
+      open={showCropModal}
+      image={cropImageSrc}
+      onCancel={() => { setShowCropModal(false); setCropImageSrc(null); }}
+      onCrop={handleCropDone}
+    />
+  </div>
+); // penutup fungsi komponen
 }
