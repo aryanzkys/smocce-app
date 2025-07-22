@@ -3,15 +3,15 @@ const electionConfig = {
   periods: {
     PJ: {
       name: 'Pemilihan PJ Bidang',
-      startDate: new Date('2025-08-05T00:00:00+07:00'), // 5 Agustus 2025
-      endDate: new Date('2025-08-05T23:59:59+07:00'),   // Akhir 5 Agustus 2025
+      startDate: new Date('2025-07-23T02:30:00+07:00'), // 23 Juli 2025 jam 2.30 pagi
+      endDate: new Date('2025-07-31T01:00:00+07:00'),   // 31 Juli 2025 jam 1 pagi
       type: 'pj',
       description: 'Pemilihan Penanggung Jawab Bidang'
     },
     KETUA: {
       name: 'Pemilihan Ketua SOC',
-      startDate: new Date('2025-08-12T00:00:00+07:00'), // 12 Agustus 2025
-      endDate: new Date('2025-08-12T23:59:59+07:00'),   // Akhir 12 Agustus 2025
+      startDate: new Date('2025-07-31T01:00:00+07:00'), // 31 Juli 2025 jam 1 pagi (langsung setelah PJ)
+      endDate: new Date('2025-07-31T23:59:59+07:00'),   // 31 Juli 2025 akhir hari
       type: 'ketua',
       description: 'Pemilihan Ketua SMANESI Olympiad Club'
     }

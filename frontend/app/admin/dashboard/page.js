@@ -1070,26 +1070,16 @@ export default function AdminDashboard() {
                 <input
                   type="file"
                   accept="image/*"
-                  onChange={async (e) => {
+                  onChange={e => {
                     const file = e.target.files[0];
                     if (!file) return;
-                    // Optional: tampilkan loading
-                    const formData = new FormData();
-                    formData.append('photo', file);
-                    try {
-                      const res = await fetch('https://smocce-app-production.up.railway.app/api/upload/photo', {
-                        method: 'POST',
-                        body: formData
-                      });
-                      const data = await res.json();
-                      if (res.ok && data.url) {
-                        setCandidateForm({ ...candidateForm, photo: data.url });
-                      } else {
-                        alert('Gagal upload foto');
-                      }
-                    } catch (err) {
-                      alert('Error upload foto');
-                    }
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      setCropImageSrc(reader.result);
+                      setShowCropModal(true);
+                      setCropTarget('add');
+                    };
+                    reader.readAsDataURL(file);
                   }}
                   className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
