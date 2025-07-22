@@ -3,6 +3,10 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function AdminDashboard() {
+  // Fungsi untuk menutup modal tambah kandidat
+  const handleCancelAdd = () => {
+    setShowAddModal(false);
+  };
   const [showAddModal, setShowAddModal] = useState(false);
   // Fungsi untuk membuka modal tambah kandidat
   const handleAddCandidate = () => {
