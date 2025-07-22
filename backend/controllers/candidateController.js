@@ -82,6 +82,10 @@ const updateCandidate = async (req, res) => {
     const { candidateId } = req.params;
     const updates = req.body;
 
+    // Fallback: jika updates.photo kosong/null, isi default
+    if (!updates.photo || updates.photo.trim() === '') {
+      updates.photo = '/default-avatar.jpg';
+    }
     const candidate = await Candidate.findOneAndUpdate(
       { candidateId },
       updates,
