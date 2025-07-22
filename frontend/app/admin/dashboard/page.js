@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function AdminDashboard() {
+  const [showAddModal, setShowAddModal] = useState(false);
   // Fungsi untuk membuka modal tambah kandidat
   const handleAddCandidate = () => {
     setCandidateForm({
