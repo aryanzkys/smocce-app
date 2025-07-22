@@ -25,7 +25,7 @@ export default function DashboardPage() {
       setUser(userData)
       fetchElectionData(userData.nisn)
     }
-  }, [])
+  }, [router])
 
   const fetchElectionData = async (nisn) => {
     try {

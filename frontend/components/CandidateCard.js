@@ -1,4 +1,6 @@
+
 import { useState } from 'react'
+import Image from 'next/image'
 
 export default function CandidateCard({ name, photo, vision, mission, experience, onSelect, selected }) {
   const [showDetails, setShowDetails] = useState(false)
@@ -24,9 +26,11 @@ export default function CandidateCard({ name, photo, vision, mission, experience
         {/* Profile Section */}
         <div className="text-center mb-6">
           <div className="relative inline-block">
-            <img 
-              src={photo} 
-              alt={name} 
+            <Image
+              src={photo}
+              alt={name}
+              width={96}
+              height={96}
               className={`w-24 h-24 object-cover rounded-full mx-auto border-4 transition-all duration-300 ${
                 selected ? 'border-blue-400 shadow-lg' : 'border-gray-200 shadow-md'
               }`}

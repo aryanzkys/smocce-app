@@ -1,5 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 
 export default function ThanksPage() {
   const [voteType, setVoteType] = useState('complete') // 'pj', 'ketua', or 'complete'
@@ -37,12 +38,12 @@ export default function ThanksPage() {
           </div>
 
           <div className="space-y-4">
-            <a
+            <Link
               href="/"
               className="inline-block bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-xl shadow-md transition w-full"
             >
               Kembali ke Halaman Utama
-            </a>
+            </Link>
             <p className="text-sm text-gray-500">
               Simpan NISN dan Token Anda untuk pemilihan Ketua SOC
             </p>
@@ -86,12 +87,12 @@ export default function ThanksPage() {
         </div>
 
         <div className="space-y-4">
-          <a
+          <Link
             href="/"
             className="inline-block bg-green-600 hover:bg-green-700 text-white font-semibold py-3 px-8 rounded-xl shadow-md transition w-full"
           >
             Kembali ke Halaman Utama
-          </a>
+          </Link>
           <p className="text-sm text-gray-500">
             SMOCCE 2025 - Science Olympiad Club Election System
           </p>
