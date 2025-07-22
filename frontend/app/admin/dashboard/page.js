@@ -3,6 +3,38 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 export default function AdminDashboard() {
+  // Fungsi untuk menyimpan kandidat baru
+  const handleSaveNewCandidate = async () => {
+    try {
+      const res = await fetch('https://smocce-app-production.up.railway.app/api/admin/candidates', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(candidateForm)
+      });
+      if (res.ok) {
+        alert('Kandidat berhasil ditambahkan!');
+        setShowAddModal(false);
+        setCandidateForm({
+          candidateId: '',
+          name: '',
+          type: 'ketua',
+          bidang: '',
+          photo: '',
+          vision: '',
+          mission: '',
+          experience: ''
+        });
+        fetchData && fetchData();
+      } else {
+        const data = await res.json();
+        alert('Gagal menambah kandidat: ' + (data.message || 'Unknown error'));
+      }
+    } catch (error) {
+      alert('Terjadi error saat menambah kandidat');
+    }
+  };
   // Fungsi untuk menutup modal tambah kandidat
   const handleCancelAdd = () => {
     setShowAddModal(false);
