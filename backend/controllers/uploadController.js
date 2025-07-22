@@ -2,9 +2,9 @@ const cloudinary = require('cloudinary').v2;
 
 // Konfigurasi Cloudinary
 cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
+  cloud_name: 'dpluklncp',
+  api_key: '722696836139561',
+  api_secret: 'D3IgdRgvHZw_O0_tVDueslk_h4Q',
 });
 
 // Fungsi upload gambar ke Cloudinary
