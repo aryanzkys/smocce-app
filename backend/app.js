@@ -84,6 +84,8 @@ console.log('Registering route: /api/admin');
 app.use('/api/admin', adminRoutes);
 console.log('Registering route: /api/candidates');
 app.use('/api/candidates', candidateRoutes);
+console.log('Registering route: /api/upload');
+app.use('/api/upload', require('./routes/upload'));
 
 // Root endpoint
 console.log('Registering route: /');
