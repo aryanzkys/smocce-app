@@ -13,7 +13,7 @@ const electionConfig = {
       startDate: new Date('2025-08-12T00:00:00+07:00'), // 12 Agustus 2025
       endDate: new Date('2025-08-12T23:59:59+07:00'),   // Akhir 12 Agustus 2025
       type: 'ketua',
-      description: 'Pemilihan Ketua Science Olympiad Club'
+      description: 'Pemilihan Ketua SMANESI Olympiad Club'
     }
   }
 };
