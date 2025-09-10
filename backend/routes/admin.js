@@ -1,5 +1,6 @@
 const express = require('express');
 const {
+  adminLogin,
   getDashboardStats,
   getAllUsers,
   getAllVotes,
@@ -12,6 +13,7 @@ const {
   bulkImportUsers,
   regenerateUserToken
 } = require('../controllers/adminController');
+const { verifyAdmin } = require('../middleware/auth');
 
 const {
   getAllCandidates,
@@ -23,38 +25,41 @@ const {
 
 const router = express.Router();
 
-// Dashboard statistics
-router.get('/stats', getDashboardStats);
+// Public: Admin login
+router.post('/login', adminLogin);
+
+// Protected routes below
+router.get('/stats', verifyAdmin, getDashboardStats);
 
 // User management
-router.get('/users', getAllUsers);
+router.get('/users', verifyAdmin, getAllUsers);
 
 // Vote management
-router.get('/votes', getAllVotes);
+router.get('/votes', verifyAdmin, getAllVotes);
 
 // Voting results
-router.get('/results', getVotingResults);
+router.get('/results', verifyAdmin, getVotingResults);
 
 // Reset user vote (for testing)
-router.delete('/users/:nisn/vote', resetUserVote);
+router.delete('/users/:nisn/vote', verifyAdmin, resetUserVote);
 
 // Regenerate user token
-router.put('/users/:nisn/token', regenerateUserToken);
+router.put('/users/:nisn/token', verifyAdmin, regenerateUserToken);
 
 // Export data
-router.get('/export', exportVotingData);
-router.get('/export/users-csv', exportUsersCSV);
-router.get('/export/results-csv', exportVotingResultsCSV);
-router.get('/export/comprehensive', exportComprehensiveReport);
+router.get('/export', verifyAdmin, exportVotingData);
+router.get('/export/users-csv', verifyAdmin, exportUsersCSV);
+router.get('/export/results-csv', verifyAdmin, exportVotingResultsCSV);
+router.get('/export/comprehensive', verifyAdmin, exportComprehensiveReport);
 
 // Bulk import users
-router.post('/import/users', bulkImportUsers);
+router.post('/import/users', verifyAdmin, bulkImportUsers);
 
 // Candidate management
-router.get('/candidates', getAllCandidates);
-router.get('/candidates/:candidateId', getCandidateDetails);
-router.put('/candidates/:candidateId', updateCandidate);
-router.post('/candidates', createCandidate);
-router.delete('/candidates/:candidateId', deleteCandidate);
+router.get('/candidates', verifyAdmin, getAllCandidates);
+router.get('/candidates/:candidateId', verifyAdmin, getCandidateDetails);
+router.put('/candidates/:candidateId', verifyAdmin, updateCandidate);
+router.post('/candidates', verifyAdmin, createCandidate);
+router.delete('/candidates/:candidateId', verifyAdmin, deleteCandidate);
 
 module.exports = router;

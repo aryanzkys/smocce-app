@@ -1,6 +1,7 @@
 // API Configuration and Utilities for SMOCCE 2025
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+// Prefer same-origin relative API on Netlify (handled by netlify.toml redirects)
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 // API Client with error handling
 class ApiClient {
@@ -93,7 +94,8 @@ const api = new ApiClient();
 // API Endpoints
 export const apiEndpoints = {
   // Health check
-  health: '/health',
+  // Expose health under /api as it's proxied by Netlify to functions
+  health: '/api/health',
   
   // Authentication
   auth: {

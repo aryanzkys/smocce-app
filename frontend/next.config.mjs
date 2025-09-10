@@ -6,14 +6,17 @@ const nextConfig = {
     NEXT_PUBLIC_ELECTION_YEAR: process.env.NEXT_PUBLIC_ELECTION_YEAR,
   },
   
-  // API proxy for development
+  // API proxy only in development; in production, Netlify redirects handle /api to functions
   async rewrites() {
-    return [
-      {
-        source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/:path*`,
-      },
-    ];
+    if (process.env.NODE_ENV === 'development') {
+      return [
+        {
+          source: '/api/:path*',
+          destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/:path*`,
+        },
+      ];
+    }
+    return [];
   },
   
   // Image optimization
@@ -21,6 +24,7 @@ const nextConfig = {
     domains: [
       'localhost',
       'smocce-backend.onrender.com',
+  'res.cloudinary.com',
       'via.placeholder.com',
     ],
     formats: ['image/webp', 'image/avif'],

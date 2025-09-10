@@ -1,5 +1,6 @@
 'use client'
 import { useState } from 'react'
+import { apiService, utils } from '../../../lib/api'
 import { useRouter } from 'next/navigation'
 
 export default function AdminLoginPage() {
@@ -11,12 +12,17 @@ export default function AdminLoginPage() {
   const handleSubmit = async (e) => {
     e.preventDefault()
 
-    // Simple admin authentication (in production, use proper auth)
-    if (username === 'admin' && password === 'smocce2025') {
-      localStorage.setItem('adminAuth', 'true')
-      router.push('/admin/dashboard')
-    } else {
-      setError('Username atau password salah')
+    try {
+      const res = await apiService.adminLogin({ username, password })
+      if (res?.token) {
+        localStorage.setItem('adminToken', res.token)
+        localStorage.setItem('adminAuth', 'true') // fallback flag
+        router.push('/admin/dashboard')
+      } else {
+        setError('Login gagal')
+      }
+    } catch (e) {
+      setError(utils.formatApiError(e))
     }
   }
 

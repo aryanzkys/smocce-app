@@ -1,0 +1,17 @@
+{
+  "name": "smocce-app",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "build:frontend": "cd frontend && npm ci && npm run build",
+    "build:functions": "echo Building functions",
+    "build:all": "npm run build:frontend && npm run build:functions",
+    "postinstall": "cd frontend && npm ci && cd ../backend && npm ci"
+  },
+  "devDependencies": {
+    "@netlify/plugin-nextjs": "^5.8.1"
+  }
+}

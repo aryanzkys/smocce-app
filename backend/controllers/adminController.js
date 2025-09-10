@@ -1,5 +1,28 @@
 const User = require('../models/User');
 const Vote = require('../models/vote');
+const jwt = require('jsonwebtoken');
+
+// Admin login (username/password from ENV)
+const adminLogin = async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    const adminUser = process.env.ADMIN_USERNAME || 'admin';
+    const adminPass = process.env.ADMIN_PASSWORD || 'smocce2025';
+    if (username !== adminUser || password !== adminPass) {
+      return res.status(401).json({ message: 'Username atau password salah' });
+    }
+    const secret = process.env.ADMIN_JWT_SECRET || 'supersecret_admin';
+    const token = jwt.sign(
+      { role: 'admin', username },
+      secret,
+      { expiresIn: '12h' }
+    );
+    return res.json({ token });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
 
 // Get dashboard statistics
 const getDashboardStats = async (req, res) => {
@@ -523,6 +546,7 @@ const bulkImportUsers = async (req, res) => {
 };
 
 module.exports = {
+  adminLogin,
   getDashboardStats,
   getAllUsers,
   getAllVotes,

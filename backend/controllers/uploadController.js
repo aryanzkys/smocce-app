@@ -1,10 +1,10 @@
 const cloudinary = require('cloudinary').v2;
 
-// Konfigurasi Cloudinary
+// Konfigurasi Cloudinary via ENV (lebih aman untuk deployment)
 cloudinary.config({
-  cloud_name: 'dpluklncp',
-  api_key: '722696836139561',
-  api_secret: 'D3IgdRgvHZw_O0_tVDueslk_h4Q',
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
 // Fungsi upload gambar ke Cloudinary
@@ -17,6 +17,10 @@ exports.uploadPhoto = async (req, res) => {
     CLOUDINARY_API_SECRET: process.env.CLOUDINARY_API_SECRET ? '***' : undefined
   });
   try {
+    // Validasi konfigurasi Cloudinary
+    if (!process.env.CLOUDINARY_CLOUD_NAME || !process.env.CLOUDINARY_API_KEY || !process.env.CLOUDINARY_API_SECRET) {
+      return res.status(500).json({ message: 'Cloudinary tidak terkonfigurasi dengan benar. Cek environment variables.' });
+    }
     if (!req.file) {
       return res.status(400).json({ message: 'No file uploaded' });
     }

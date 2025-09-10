@@ -30,8 +30,9 @@ export default function AdminDashboard() {
     const formData = new FormData();
     formData.append('photo', croppedBlob, 'cropped.jpg');
     try {
-      const res = await fetch('https://smocce-app-production.up.railway.app/api/upload/photo', {
+      const res = await fetch('/api/upload/photo', {
         method: 'POST',
+        headers: authHeaders(),
         body: formData
       });
       const data = await res.json();
@@ -48,11 +49,9 @@ export default function AdminDashboard() {
   // Fungsi untuk menyimpan kandidat baru
   const handleSaveNewCandidate = async () => {
     try {
-      const res = await fetch('https://smocce-app-production.up.railway.app/api/admin/candidates', {
+      const res = await fetch('/api/admin/candidates', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(candidateForm)
       });
       if (res.ok) {
@@ -118,6 +117,12 @@ export default function AdminDashboard() {
     experience: ''
   })
 
+  const authHeaders = () => {
+    if (typeof window === 'undefined') return {};
+    const token = localStorage.getItem('adminToken');
+    return token ? { Authorization: `Bearer ${token}` } : {};
+  }
+
   useEffect(() => {
     // Check admin authentication
     const adminAuth = localStorage.getItem('adminAuth')
@@ -134,27 +139,27 @@ export default function AdminDashboard() {
       setLoading(true)
       
       // Fetch dashboard stats
-      const statsRes = await fetch('https://smocce-app-production.up.railway.app/api/admin/stats')
+  const statsRes = await fetch('/api/admin/stats', { headers: authHeaders() })
       const statsData = await statsRes.json()
       setStats(statsData)
 
       // Fetch users
-      const usersRes = await fetch('https://smocce-app-production.up.railway.app/api/admin/users')
+  const usersRes = await fetch('/api/admin/users', { headers: authHeaders() })
       const usersData = await usersRes.json()
       setUsers(usersData.users)
 
       // Fetch votes
-      const votesRes = await fetch('https://smocce-app-production.up.railway.app/api/admin/votes')
+  const votesRes = await fetch('/api/admin/votes', { headers: authHeaders() })
       const votesData = await votesRes.json()
       setVotes(votesData.votes)
 
       // Fetch results
-      const resultsRes = await fetch('https://smocce-app-production.up.railway.app/api/admin/results')
+  const resultsRes = await fetch('/api/admin/results', { headers: authHeaders() })
       const resultsData = await resultsRes.json()
       setResults(resultsData)
 
       // Fetch candidates
-      const candidatesRes = await fetch('https://smocce-app-production.up.railway.app/api/admin/candidates')
+  const candidatesRes = await fetch('/api/admin/candidates', { headers: authHeaders() })
       const candidatesData = await candidatesRes.json()
       setCandidates(candidatesData)
 
@@ -174,8 +179,9 @@ export default function AdminDashboard() {
     if (!confirm(`Reset vote untuk NISN ${nisn}?`)) return
 
     try {
-      const res = await fetch(`https://smocce-app-production.up.railway.app/api/admin/users/${nisn}/vote`, {
-        method: 'DELETE'
+      const res = await fetch(`/api/admin/users/${nisn}/vote`, {
+        method: 'DELETE',
+        headers: authHeaders(),
       })
       
       if (res.ok) {
@@ -194,8 +200,9 @@ export default function AdminDashboard() {
     if (!confirm(`Regenerate token untuk NISN ${nisn}?`)) return
 
     try {
-      const res = await fetch(`https://smocce-app-production.up.railway.app/api/admin/users/${nisn}/token`, {
-        method: 'PUT'
+      const res = await fetch(`/api/admin/users/${nisn}/token`, {
+        method: 'PUT',
+        headers: authHeaders(),
       })
       
       if (res.ok) {
@@ -244,11 +251,9 @@ export default function AdminDashboard() {
       }
 
       // Send to backend
-      const res = await fetch('https://smocce-app-production.up.railway.app/api/admin/import/users', {
+      const res = await fetch('/api/admin/import/users', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify({ users })
       })
 
@@ -327,11 +332,9 @@ export default function AdminDashboard() {
     if (!editingCandidate) return
 
     try {
-      const res = await fetch(`https://smocce-app-production.up.railway.app/api/admin/candidates/${editingCandidate.candidateId}`, {
+      const res = await fetch(`/api/admin/candidates/${editingCandidate.candidateId}`, {
         method: 'PUT',
-        headers: {
-          'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
         body: JSON.stringify(candidateForm)
       })
 
@@ -370,27 +373,27 @@ export default function AdminDashboard() {
 
   const exportData = async (type = 'json') => {
     try {
-      let url = 'https://smocce-app-production.up.railway.app/api/admin/export'
+  let url = '/api/admin/export'
       let filename = `smocce-data-${new Date().toISOString().split('T')[0]}`
       
       switch (type) {
         case 'users-csv':
-          url = 'https://smocce-app-production.up.railway.app/api/admin/export/users-csv'
+          url = '/api/admin/export/users-csv'
           filename = `data-pemilih-${new Date().toISOString().split('T')[0]}.csv`
           break
         case 'results-csv':
-          url = 'https://smocce-app-production.up.railway.app/api/admin/export/results-csv'
+          url = '/api/admin/export/results-csv'
           filename = `hasil-voting-${new Date().toISOString().split('T')[0]}.csv`
           break
         case 'comprehensive':
-          url = 'https://smocce-app-production.up.railway.app/api/admin/export/comprehensive'
+          url = '/api/admin/export/comprehensive'
           filename = `laporan-lengkap-${new Date().toISOString().split('T')[0]}.json`
           break
         default:
           filename += '.json'
       }
 
-      const res = await fetch(url)
+  const res = await fetch(url, { headers: authHeaders() })
       
       if (type.includes('csv')) {
         // Handle CSV download

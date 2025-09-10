@@ -40,9 +40,19 @@ app.use(cors({
       return callback(null, true);
     }
     
-    // For development, allow localhost with any port
-    if (process.env.NODE_ENV !== 'production' && origin.includes('localhost')) {
+  // For development, allow localhost with any port
+  if (process.env.NODE_ENV !== 'production' && origin.includes('localhost')) {
       return callback(null, true);
+    }
+    
+    // Allow Netlify preview/production domains by default
+    try {
+      const url = new URL(origin);
+      if (url.hostname.endsWith('.netlify.app')) {
+        return callback(null, true);
+      }
+    } catch (e) {
+      // ignore URL parse errors
     }
     
     callback(new Error('Not allowed by CORS'));
@@ -65,6 +75,18 @@ app.use(express.urlencoded({ extended: true, limit: '10mb' }));
 
 // Health check endpoint
 app.get('/health', (req, res) => {
+  res.json({
+    status: 'OK',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development',
+    uptime: process.uptime(),
+    memory: process.memoryUsage(),
+    version: '1.0.0'
+  });
+});
+
+// Mirror health under /api for platform proxies
+app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
     timestamp: new Date().toISOString(),
@@ -131,42 +153,42 @@ app.use((error, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 5000;
+// Mongo connection helper for server and serverless
+let isConnecting = null;
+async function connectDB() {
+  if (mongoose.connection.readyState >= 1) {
+    return;
+  }
+  if (!isConnecting) {
+    isConnecting = mongoose.connect(process.env.MONGO_URI, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    }).then(() => {
+      console.log('✅ Connected to MongoDB');
+      console.log(`📊 Database: ${mongoose.connection.name}`);
+    }).catch(err => {
+      console.error('❌ MongoDB connection error:', err);
+      isConnecting = null;
+      throw err;
+    });
+  }
+  return isConnecting;
+}
 
-// MongoDB Connection
-mongoose.connect(process.env.MONGO_URI, {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-})
-.then(() => {
-  console.log('✅ Connected to MongoDB');
-  console.log(`📊 Database: ${mongoose.connection.name}`);
-  
-  // Start server
-  app.listen(PORT, () => {
-    console.log(`🚀 Server running on port ${PORT}`);
-    console.log(`🌍 Environment: ${process.env.NODE_ENV || 'development'}`);
-    console.log(`🔗 Health check: http://localhost:${PORT}/health`);
-  });
-})
-.catch((err) => {
-  console.error('❌ MongoDB connection error:', err);
-  process.exit(1);
-});
+module.exports = { app, connectDB };
 
-// Graceful shutdown
-process.on('SIGTERM', () => {
-  console.log('SIGTERM received, shutting down gracefully');
-  mongoose.connection.close(() => {
-    console.log('MongoDB connection closed');
-    process.exit(0);
-  });
-});
-
-process.on('SIGINT', () => {
-  console.log('SIGINT received, shutting down gracefully');
-  mongoose.connection.close(() => {
-    console.log('MongoDB connection closed');
-    process.exit(0);
-  });
-});
+// Start local server if executed directly (for local dev)
+if (require.main === module) {
+  (async () => {
+    try {
+      await connectDB();
+      const PORT = process.env.PORT || 5000;
+      app.listen(PORT, () => {
+        console.log(`🚀 Server running on port ${PORT}`);
+      });
+    } catch (e) {
+      console.error('Failed to start server:', e);
+      process.exit(1);
+    }
+  })();
+}
