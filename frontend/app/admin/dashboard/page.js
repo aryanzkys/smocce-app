@@ -103,6 +103,7 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState([])
   const [editingUser, setEditingUser] = useState(null)
   const [editBidang, setEditBidang] = useState('')
+  const [editNisn, setEditNisn] = useState('')
   const [votes, setVotes] = useState([])
   const [results, setResults] = useState(null)
   const [candidates, setCandidates] = useState({ ketua: [], pj: {} })
@@ -260,6 +261,7 @@ export default function AdminDashboard() {
   const openEditUser = (user) => {
     setEditingUser(user)
     setEditBidang(user.bidang || '')
+  setEditNisn(user.nisn || '')
   }
 
   const saveUserEdit = async () => {
@@ -268,11 +270,12 @@ export default function AdminDashboard() {
       const res = await withBusy(() => fetch(`/api/admin/users/${editingUser.nisn}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...authHeaders() },
-        body: JSON.stringify({ bidang: editBidang })
+        body: JSON.stringify({ bidang: editBidang, nisn: editNisn })
       }), 'Saving user...')
       if (res.ok) {
         setEditingUser(null)
-        setEditBidang('')
+  setEditBidang('')
+  setEditNisn('')
         fetchData()
       } else {
         const data = await res.json(); alert('Gagal update user: ' + (data.message || 'Unknown error'))
@@ -1314,11 +1317,21 @@ export default function AdminDashboard() {
               <h3 className="text-lg font-semibold text-slate-100 mb-4">Edit User {editingUser.nisn}</h3>
               <div className="space-y-4">
                 <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">NISN</label>
+                  <input
+                    type="text"
+                    value={editNisn}
+                    onChange={e => setEditNisn(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 text-slate-100 placeholder-slate-400"
+                    placeholder="Masukkan NISN baru (angka saja)"
+                  />
+                </div>
+                <div>
                   <label className="block text-sm font-medium text-slate-300 mb-2">Bidang</label>
                   <select
                     value={editBidang}
                     onChange={e => setEditBidang(e.target.value)}
-                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 text-slate-100"
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 text-slate-100 max-h-40 overflow-y-auto"
                   >
                     <option value="Matematika">Matematika</option>
                     <option value="Fisika">Fisika</option>

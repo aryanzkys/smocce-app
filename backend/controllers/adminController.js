@@ -2,6 +2,12 @@ const User = require('../models/User');
 const Vote = require('../models/vote');
 const jwt = require('jsonwebtoken');
 
+// Allowed bidang list (single source of truth)
+const VALID_BIDANG = [
+  'Matematika', 'Fisika', 'Biologi', 'Kimia', 'Informatika',
+  'Astronomi', 'Ekonomi', 'Kebumian', 'Geografi'
+];
+
 // Admin login (username/password from ENV)
 const adminLogin = async (req, res) => {
   try {
@@ -112,22 +118,46 @@ const getAllUsers = async (req, res) => {
 // Update a user (currently allows updating 'bidang' only)
 const updateUser = async (req, res) => {
   try {
-    const { nisn } = req.params;
-    const { bidang } = req.body;
+    const { nisn } = req.params; // current NISN
+    const { bidang, nisn: newNisn } = req.body;
 
-    if (!bidang) {
-      return res.status(400).json({ message: 'Field "bidang" is required' });
+    if (!bidang && !newNisn) {
+      return res.status(400).json({ message: 'Nothing to update. Provide bidang and/or nisn.' });
     }
 
-    const user = await User.findOne({ nisn });
+    if (bidang && !VALID_BIDANG.includes(bidang)) {
+      return res.status(400).json({ message: `Invalid bidang. Must be one of: ${VALID_BIDANG.join(', ')}` });
+    }
+
+    let user = await User.findOne({ nisn });
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
-    user.bidang = bidang;
+    let updatedVotes = 0;
+
+    // Handle NISN change
+    if (newNisn && newNisn !== user.nisn) {
+      if (!/^\d+$/.test(newNisn)) {
+        return res.status(400).json({ message: 'NISN harus berupa angka saja' });
+      }
+      const exists = await User.findOne({ nisn: newNisn });
+      if (exists) {
+        return res.status(409).json({ message: 'NISN baru sudah digunakan oleh user lain' });
+      }
+      // Update votes referencing old NISN
+      const voteUpdate = await Vote.updateMany({ nisn }, { $set: { nisn: newNisn } });
+      updatedVotes = voteUpdate.modifiedCount || 0;
+      user.nisn = newNisn;
+    }
+
+    if (bidang) {
+      user.bidang = bidang;
+    }
+
     await user.save();
 
-    res.json({ message: 'User updated successfully', user: {
+    res.json({ message: 'User updated successfully', updatedVotes, user: {
       nisn: user.nisn,
       bidang: user.bidang,
       hasVoted: user.hasVoted,
@@ -493,11 +523,8 @@ const bulkImportUsers = async (req, res) => {
       tokensGenerated: []
     };
 
-    // Validasi bidang yang diizinkan
-    const validBidang = [
-      'Matematika', 'Fisika', 'Biologi', 'Kimia', 'Informatika',
-      'Astronomi', 'Ekonomi', 'Kebumian', 'Geografi'
-    ];
+  // Validasi bidang yang diizinkan
+  const validBidang = VALID_BIDANG;
 
     for (const userData of users) {
       try {
@@ -518,7 +545,7 @@ const bulkImportUsers = async (req, res) => {
         }
 
         // Validate bidang
-        if (!validBidang.includes(bidang)) {
+  if (!validBidang.includes(bidang)) {
           results.failed++;
           results.errors.push(`Invalid bidang: ${bidang}. Must be one of: ${validBidang.join(', ')}`);
           continue;
