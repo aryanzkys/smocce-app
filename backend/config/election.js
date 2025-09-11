@@ -117,6 +117,25 @@ async function getNextElectionPeriodAsync() {
   }
 }
 
+// Kembalikan kedua periode (PJ dan KETUA) dari DB jika ada, fallback ke config statis
+async function getAllElectionPeriodsAsync() {
+  try {
+    const [pj, ketua] = await Promise.all([
+      ElectionPeriod.findOne({ period: 'PJ' }),
+      ElectionPeriod.findOne({ period: 'KETUA' }),
+    ])
+    return {
+      PJ: pj || electionConfig.periods.PJ,
+      KETUA: ketua || electionConfig.periods.KETUA,
+    }
+  } catch (e) {
+    return {
+      PJ: electionConfig.periods.PJ,
+      KETUA: electionConfig.periods.KETUA,
+    }
+  }
+}
+
 // Fungsi untuk cek apakah user sudah vote di periode tertentu
 function hasUserVotedInPeriod(userVotes, period) {
   if (!userVotes) return false;
@@ -138,5 +157,6 @@ module.exports = {
   getNextElectionPeriod,
   getCurrentElectionPeriodAsync,
   getNextElectionPeriodAsync,
+  getAllElectionPeriodsAsync,
   hasUserVotedInPeriod
 };

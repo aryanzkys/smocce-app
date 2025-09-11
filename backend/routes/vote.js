@@ -1,7 +1,7 @@
 const express = require('express');
 const User = require('../models/User');
 const Vote = require('../models/vote');
-const { getCurrentElectionPeriod, hasUserVotedInPeriod, getCurrentElectionPeriodAsync } = require('../config/election');
+const { getCurrentElectionPeriod, hasUserVotedInPeriod, getCurrentElectionPeriodAsync, getAllElectionPeriodsAsync } = require('../config/election');
 
 const router = express.Router();
 
@@ -9,7 +9,8 @@ const router = express.Router();
 router.get('/status', async (req, res) => {
   try {
   const electionStatus = await getCurrentElectionPeriodAsync();
-    res.json(electionStatus);
+  const all = await getAllElectionPeriodsAsync();
+  res.json({ ...electionStatus, allPeriods: all });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: 'Server error' });

@@ -112,8 +112,8 @@ export default function Home() {
   // Derive schedule cards
   const active = status?.active
   const period = status?.period
-  const pj = status?.period === 'PJ' ? status?.config : (status?.nextPeriod?.period === 'PJ' ? status?.nextPeriod?.config : null)
-  const ketua = status?.period === 'KETUA' ? status?.config : (status?.nextPeriod?.period === 'KETUA' ? status?.nextPeriod?.config : null)
+  const pj = status?.allPeriods?.PJ || (status?.period === 'PJ' ? status?.config : (status?.nextPeriod?.period === 'PJ' ? status?.nextPeriod?.config : null))
+  const ketua = status?.allPeriods?.KETUA || (status?.period === 'KETUA' ? status?.config : (status?.nextPeriod?.period === 'KETUA' ? status?.nextPeriod?.config : null))
 
   const nextTarget = active
     ? (status?.config?.endDate ? new Date(status.config.endDate) : null)
@@ -180,7 +180,10 @@ export default function Home() {
                   <div>
                     <div className="text-[11px] text-cyan-300/60">{active ? 'Berakhir dalam' : 'Mulai dalam'}</div>
                     <div className="font-mono text-cyan-100 text-lg">{parts.d}h {pad(parts.h)}j {pad(parts.m)}m {pad(parts.s)}d</div>
-                    <div className="text-[11px] text-cyan-300/70">{active ? 'Periode aktif' : (status?.nextPeriod?.period ? `Periode berikutnya: ${status.nextPeriod.period}` : 'Tidak ada periode berikutnya')}</div>
+                    <div className="text-[11px] text-cyan-300/70">
+                      {active ? `Periode aktif: ${period === 'PJ' ? 'Pemilihan PJ Bidang' : period === 'KETUA' ? 'Pemilihan Ketua SOC' : ''}` :
+                        (status?.nextPeriod?.period ? `Periode berikutnya: ${status.nextPeriod.period === 'PJ' ? 'Pemilihan PJ Bidang' : 'Pemilihan Ketua SOC'}` : 'Tidak ada periode berikutnya')}
+                    </div>
                   </div>
                 </div>
               </div>
