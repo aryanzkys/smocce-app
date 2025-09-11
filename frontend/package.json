@@ -11,6 +11,7 @@
   "dependencies": {
     "critters": "^0.0.23",
     "next": "15.4.2",
+  "lightningcss": "^1.27.0",
   "serverless-http": "^3.2.0",
   "normalize-wheel": "^1.0.1",
     "react": "19.1.0",
@@ -28,6 +29,7 @@
   }
   ,
   "optionalDependencies": {
-    "@next/swc-linux-x64-gnu": "15.4.2"
+  "@next/swc-linux-x64-gnu": "15.4.2",
+  "lightningcss-linux-x64-gnu": "^1.27.0"
   }
 }
