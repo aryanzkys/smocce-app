@@ -6,10 +6,10 @@
     "backend"
   ],
   "scripts": {
-  "build:frontend": "npm --prefix frontend install && npm --prefix frontend run build",
+  "build:frontend": "npm --prefix frontend install --include=dev && npm --prefix frontend run build",
     "build:functions": "echo Building functions",
   "build:all": "npm run build:frontend && npm run build:functions",
-  "postinstall": "npm --prefix frontend install && npm --prefix backend install"
+  "postinstall": "npm --prefix frontend install --include=dev && npm --prefix backend install"
   },
   "devDependencies": {
     "@netlify/plugin-nextjs": "^5.8.1"
