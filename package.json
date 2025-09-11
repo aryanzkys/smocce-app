@@ -11,6 +11,9 @@
   "build:all": "npm run build:frontend && npm run build:functions",
   "postinstall": "npm --prefix frontend install --include=dev && npm --prefix backend install"
   },
+  "dependencies": {
+    "serverless-http": "^3.2.0"
+  },
   "devDependencies": {
     "@netlify/plugin-nextjs": "^5.8.1"
   }

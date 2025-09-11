@@ -1,9 +1,10 @@
 'use client'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import CropModal from './CropModal'
 import LoadingOverlay from '../../../components/LoadingOverlay'
 import RoboHeader from '../../../components/RoboHeader'
+import Image from 'next/image'
 
 export default function AdminDashboard() {
   // ...state dan handler cropping di atas...
@@ -137,11 +138,11 @@ export default function AdminDashboard() {
     }
   }
 
-  const authHeaders = () => {
+  const authHeaders = useCallback(() => {
     if (typeof window === 'undefined') return {};
     const token = localStorage.getItem('adminToken');
     return token ? { Authorization: `Bearer ${token}` } : {};
-  }
+  }, [])
 
   useEffect(() => {
     // Check admin authentication
@@ -152,7 +153,7 @@ export default function AdminDashboard() {
     }
 
     fetchData()
-  }, [])
+  }, [fetchData, router])
 
   // Close export dropdown on outside click
   const exportPanelRef = useRef(null)
@@ -167,7 +168,7 @@ export default function AdminDashboard() {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [showExportMenu])
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     try {
       setLoading(true)
       
@@ -201,7 +202,7 @@ export default function AdminDashboard() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [authHeaders])
 
   const handleLogout = () => {
   localStorage.removeItem('adminAuth')
@@ -748,11 +749,12 @@ export default function AdminDashboard() {
                   {candidates.ketua.map((candidate) => (
                     <div key={candidate.candidateId} className="border border-slate-800 rounded-lg p-4 bg-slate-800/40">
                       <div className="text-center mb-3">
-                        <img 
-                          src={candidate.photo} 
+                        <Image
+                          src={candidate.photo || '/default-avatar.jpg'}
                           alt={candidate.name}
+                          width={64}
+                          height={64}
                           className="w-16 h-16 object-cover rounded-full mx-auto mb-2"
-                          onError={(e) => { e.target.src = '/default-avatar.jpg' }}
                         />
                         <h4 className="font-medium text-slate-100">{candidate.name}</h4>
                         <p className="text-sm text-slate-400">ID: {candidate.candidateId}</p>
@@ -777,11 +779,12 @@ export default function AdminDashboard() {
                     {pjCandidates.map((candidate) => (
                       <div key={candidate.candidateId} className="border border-slate-800 rounded-lg p-4 bg-slate-800/40">
                         <div className="text-center mb-3">
-                          <img 
-                            src={candidate.photo} 
+                          <Image
+                            src={candidate.photo || '/default-avatar.jpg'}
                             alt={candidate.name}
+                            width={64}
+                            height={64}
                             className="w-16 h-16 object-cover rounded-full mx-auto mb-2"
-                            onError={(e) => { e.target.src = '/default-avatar.jpg' }}
                           />
                           <h4 className="font-medium text-slate-100">{candidate.name}</h4>
                           <p className="text-sm text-slate-400">ID: {candidate.candidateId}</p>
@@ -810,11 +813,12 @@ export default function AdminDashboard() {
                   {candidates.ketua.map((candidate) => (
                     <div key={candidate.candidateId} className="border border-slate-800 rounded-lg p-4 bg-slate-800/40">
                       <div className="text-center mb-3">
-                        <img 
-                          src={candidate.photo} 
+                        <Image
+                          src={candidate.photo || '/default-avatar.jpg'}
                           alt={candidate.name}
+                          width={64}
+                          height={64}
                           className="w-16 h-16 object-cover rounded-full mx-auto mb-2"
-                          onError={(e) => { e.target.src = '/default-avatar.jpg' }}
                         />
                         <h4 className="font-medium text-slate-100">{candidate.name}</h4>
                         <p className="text-sm text-slate-400">ID: {candidate.candidateId}</p>
@@ -844,11 +848,12 @@ export default function AdminDashboard() {
                     {pjCandidates.map((candidate) => (
                       <div key={candidate.candidateId} className="border border-slate-800 rounded-lg p-4 bg-slate-800/40">
                         <div className="text-center mb-3">
-                          <img 
-                            src={candidate.photo} 
+                          <Image
+                            src={candidate.photo || '/default-avatar.jpg'}
                             alt={candidate.name}
+                            width={64}
+                            height={64}
                             className="w-16 h-16 object-cover rounded-full mx-auto mb-2"
-                            onError={(e) => { e.target.src = '/default-avatar.jpg' }}
                           />
                           <h4 className="font-medium text-slate-100">{candidate.name}</h4>
                           <p className="text-sm text-slate-400">ID: {candidate.candidateId}</p>
@@ -884,11 +889,12 @@ export default function AdminDashboard() {
                     return (
           <div key={index} className="flex items-center justify-between p-4 bg-slate-800/40 rounded-lg border border-slate-800">
                         <div className="flex items-center space-x-3">
-                          <img 
-                            src={candidate?.photo || '/default-avatar.jpg'} 
+                          <Image
+                            src={candidate?.photo || '/default-avatar.jpg'}
                             alt={candidate?.name || 'Unknown'}
+                            width={48}
+                            height={48}
                             className="w-12 h-12 object-cover rounded-full"
-                            onError={(e) => { e.target.src = '/default-avatar.jpg' }}
                           />
                           <div>
             <div className="font-medium text-slate-100">{candidate?.name || result._id}</div>
@@ -917,11 +923,12 @@ export default function AdminDashboard() {
                           return (
             <div key={index} className="flex items-center justify-between p-3 bg-slate-800/40 rounded border border-slate-800">
                               <div className="flex items-center space-x-3">
-                                <img 
-                                  src={candidate?.photo || '/default-avatar.jpg'} 
+                                <Image
+                                  src={candidate?.photo || '/default-avatar.jpg'}
                                   alt={candidate?.name || 'Unknown'}
+                                  width={40}
+                                  height={40}
                                   className="w-10 h-10 object-cover rounded-full"
-                                  onError={(e) => { e.target.src = '/default-avatar.jpg' }}
                                 />
                                 <div>
               <div className="font-medium text-slate-100">{candidate?.name || candidateResult.pjId}</div>
@@ -1086,7 +1093,7 @@ export default function AdminDashboard() {
                   className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 text-slate-100"
                 />
                 {candidateForm.photo && (
-                  <img src={candidateForm.photo} alt="Preview Foto" className="mt-2 h-24 rounded shadow shadow-cyan-500/20" />
+                  <Image src={candidateForm.photo} alt="Preview Foto" width={96} height={96} className="mt-2 h-24 w-24 object-cover rounded shadow shadow-cyan-500/20" />
                 )}
               </div>
               <div>
@@ -1180,7 +1187,7 @@ export default function AdminDashboard() {
   className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 text-slate-100"
 />
 {candidateForm.photo && (
-  <img src={candidateForm.photo} alt="Preview Foto" className="mt-2 h-24 rounded shadow shadow-cyan-500/20" />
+  <Image src={candidateForm.photo} alt="Preview Foto" width={96} height={96} className="mt-2 h-24 w-24 object-cover rounded shadow shadow-cyan-500/20" />
 )}
 </div>
 
@@ -1250,5 +1257,5 @@ export default function AdminDashboard() {
       onCrop={handleCropDone}
     />
   </div>
-); // penutup fungsi komponen
+);
 }
