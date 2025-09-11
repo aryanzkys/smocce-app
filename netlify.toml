@@ -10,8 +10,6 @@
 
 [[plugins]]
   package = "@netlify/plugin-nextjs"
-  [plugins.inputs]
-    build_dir = "frontend"
 
 [functions]
   directory = "netlify/functions"
