@@ -330,6 +330,18 @@ export default function DashboardPage() {
                 ) : (
                   <p className="mt-1 text-amber-300/90">Anda telah melewatkan pemilihan dan tidak dapat melakukan pemilihan lagi.</p>
                 )}
+                <div className="mt-5 grid gap-4 md:grid-cols-3">
+                  <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4">
+                    <div className="text-[11px] text-cyan-300/60">Informasi Pemilih</div>
+                    <div className="text-sm text-cyan-200/90">NISN: <span className="font-mono">{user.nisn}</span></div>
+                    <div className="text-sm text-cyan-200/90">Bidang: <span className="text-fuchsia-300 font-medium">{user.bidang}</span></div>
+                  </div>
+                  <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4">
+                    <div className="text-[11px] text-cyan-300/60">Waktu Saat Ini</div>
+                    <div className="text-cyan-100">{formatTime(now)} WIB</div>
+                    <div className="text-[11px] text-cyan-300/70">{formatFullDate(now)}</div>
+                  </div>
+                </div>
               </div>
             )}
           </div>
