@@ -1,24 +1,17 @@
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState } from 'react'
 import Image from 'next/image'
 
 export default function CandidateCard({ name, photo, vision, mission, experience, onSelect, selected }) {
   const [showDetails, setShowDetails] = useState(false)
   const [imgSrc, setImgSrc] = useState(photo || '/default-avatar.jpg')
-  const [detailOpen, setDetailOpen] = useState(false)
-  const closeDetail = useCallback(() => setDetailOpen(false), [])
   useEffect(() => { setImgSrc(photo || '/default-avatar.jpg') }, [photo])
-  useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape') closeDetail() }
-    if (detailOpen) document.addEventListener('keydown', onKey)
-    return () => document.removeEventListener('keydown', onKey)
-  }, [detailOpen, closeDetail])
 
   return (
-    <div className={`relative overflow-hidden rounded-2xl transition-all duration-300 transform hover:scale-105 ${
+  <div className={`relative overflow-hidden rounded-2xl transition-colors duration-200 ${
       selected 
-        ? 'bg-gradient-to-br from-blue-50 to-indigo-100 border-2 border-blue-500 shadow-xl ring-4 ring-blue-200' 
-        : 'bg-white border border-gray-200 shadow-lg hover:shadow-xl hover:border-gray-300'
+    ? 'bg-blue-50 border-2 border-blue-500 shadow-lg' 
+    : 'bg-white border border-gray-200 shadow-sm hover:shadow-md hover:border-gray-300'
     }`}>
       {/* Selection Badge */}
       {selected && (
@@ -46,7 +39,7 @@ export default function CandidateCard({ name, photo, vision, mission, experience
               onError={() => setImgSrc('/default-avatar.jpg')}
             />
             {selected && (
-              <div className="absolute -bottom-1 -right-1 bg-blue-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow-lg">
+              <div className="absolute -bottom-1 -right-1 bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs font-bold shadow">
                 ✓
               </div>
             )}
@@ -69,7 +62,7 @@ export default function CandidateCard({ name, photo, vision, mission, experience
           </p>
         </div>
 
-        {/* Inline brief details toggle (kept for quick peek) */}
+  {/* Inline details (scroll down to read) */}
         {showDetails && (
           <div className="space-y-3 mb-4 animate-fadeIn">
             {mission && (
@@ -129,18 +122,6 @@ export default function CandidateCard({ name, photo, vision, mission, experience
               )}
             </button>
           )}
-          {(mission || experience) && (
-            <button
-              onClick={() => setDetailOpen(true)}
-              className={`w-full py-2 px-4 rounded-xl text-sm font-semibold transition-all duration-200 ${
-                selected
-                  ? 'bg-indigo-600 text-white hover:bg-indigo-700'
-                  : 'bg-blue-600 text-white hover:bg-blue-700'
-              }`}
-            >
-              Buka Detail Lengkap
-            </button>
-          )}
           
           <button
             onClick={onSelect}
@@ -169,62 +150,7 @@ export default function CandidateCard({ name, photo, vision, mission, experience
         </div>
       </div>
 
-      {/* Decorative Elements */}
-      {selected && (
-        <>
-          <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-indigo-500"></div>
-          <div className="absolute -top-2 -right-2 w-4 h-4 bg-blue-400 rounded-full opacity-60 animate-ping"></div>
-          <div className="absolute -bottom-2 -left-2 w-3 h-3 bg-indigo-400 rounded-full opacity-40 animate-pulse"></div>
-        </>
-      )}
-
-      {/* Full Detail Modal */}
-      {detailOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" role="dialog" aria-modal="true">
-          <div className="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden relative">
-            <button
-              onClick={closeDetail}
-              aria-label="Tutup"
-              className="absolute top-3 right-3 text-gray-500 hover:text-gray-700"
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-            <div className="p-6">
-              <div className="flex items-center gap-4 mb-4">
-                <Image src={imgSrc} alt={name} width={64} height={64} className="w-16 h-16 rounded-full object-cover border" onError={() => setImgSrc('/default-avatar.jpg')} />
-                <div>
-                  <h4 className="text-lg font-semibold text-gray-900">{name}</h4>
-                  <p className="text-xs text-gray-500">Profil Kandidat</p>
-                </div>
-              </div>
-              {vision && (
-                <section className="mb-4">
-                  <h5 className="text-sm font-semibold text-blue-700 mb-1">Visi</h5>
-                  <p className="text-sm text-gray-700 whitespace-pre-line">{vision}</p>
-                </section>
-              )}
-              {mission && (
-                <section className="mb-4">
-                  <h5 className="text-sm font-semibold text-indigo-700 mb-1">Misi</h5>
-                  <p className="text-sm text-gray-700 whitespace-pre-line">{mission}</p>
-                </section>
-              )}
-              {experience && (
-                <section className="mb-2">
-                  <h5 className="text-sm font-semibold text-green-700 mb-1">Pengalaman</h5>
-                  <p className="text-sm text-gray-700 whitespace-pre-line">{experience}</p>
-                </section>
-              )}
-              <div className="mt-6 flex justify-end gap-2">
-                <button onClick={closeDetail} className="px-4 py-2 text-sm rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200">Tutup</button>
-                <button onClick={() => { closeDetail(); onSelect && onSelect(); }} className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700">Pilih Kandidat Ini</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+  {/* Decorative Elements removed for a flatter look */}
     </div>
   );
 }
