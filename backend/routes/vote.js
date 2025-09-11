@@ -113,6 +113,10 @@ router.post('/ketua', async (req, res) => {
 
     // Cek apakah user sudah vote Ketua
     let vote = await Vote.findOne({ nisn });
+    // Wajib selesaikan PJ terlebih dahulu
+    if (!vote || !vote.pjCompleted) {
+      return res.status(403).json({ message: 'Anda harus menyelesaikan pemilihan PJ terlebih dahulu' });
+    }
     if (vote && vote.ketuaCompleted) {
       return res.status(403).json({ message: 'Anda sudah memilih Ketua SOC' });
     }

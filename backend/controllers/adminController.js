@@ -651,6 +651,25 @@ module.exports = {
       if (end <= start) {
         return res.status(400).json({ message: 'endDate harus setelah startDate' })
       }
+      // If saving KETUA, ensure it starts after PJ end (if PJ exists)
+      if (period === 'KETUA') {
+        const pj = await ElectionPeriod.findOne({ period: 'PJ' })
+        if (pj && end <= pj.endDate) {
+          // Allow ketua end to be after pj end; but start must be >= pj.end
+          if (start < pj.endDate) {
+            return res.status(400).json({ message: 'Jadwal Ketua harus dimulai setelah PJ selesai' })
+          }
+        }
+      }
+
+      // If saving PJ, optionally ensure it ends before existing Ketua start
+      if (period === 'PJ') {
+        const ketua = await ElectionPeriod.findOne({ period: 'KETUA' })
+        if (ketua && end > ketua.startDate) {
+          return res.status(400).json({ message: 'Jadwal PJ harus selesai sebelum Ketua dimulai' })
+        }
+      }
+
       const doc = await ElectionPeriod.findOneAndUpdate(
         { period },
         { period, name, description: description || '', startDate: start, endDate: end },

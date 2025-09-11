@@ -474,6 +474,8 @@ export default function DashboardPage() {
     const elapsed = start ? now - start : 0
     const percent = total ? Math.min(1, Math.max(0, elapsed / total)) : 0
 
+    const needsPJFirst = !userVoteStatus?.vote?.pjCompleted
+
     return (
       <RoboticShell>
         <div onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} className="group" style={{ perspective: '1200px' }}>
@@ -514,6 +516,13 @@ export default function DashboardPage() {
               </div>
             </div>
 
+            {needsPJFirst && (
+              <div className="mt-4 rounded-xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-100">
+                <div className="text-sm font-semibold">Lengkapi pemilihan PJ terlebih dahulu</div>
+                <div className="text-xs text-amber-200/80">Anda belum memilih PJ Bidang. Silakan kembali saat periode PJ aktif untuk memilih PJ.</div>
+              </div>
+            )}
+
             {userVoteStatus?.vote.ketuaCompleted && (
               <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-100">
                 <div className="text-sm font-semibold">Anda Sudah Menyelesaikan Pemilihan</div>
@@ -523,7 +532,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {!userVoteStatus?.vote.ketuaCompleted && (
+        {!needsPJFirst && !userVoteStatus?.vote.ketuaCompleted && (
           <>
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-cyan-100">👑 Pilih Ketua SOC</h3>
