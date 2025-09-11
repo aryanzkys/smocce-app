@@ -2,6 +2,8 @@ const express = require('express');
 const {
   adminLogin,
   getDashboardStats,
+  getElectionPeriods,
+  upsertElectionPeriod,
   getAllUsers,
   getAllVotes,
   getVotingResults,
@@ -32,6 +34,9 @@ router.post('/login', adminLogin);
 
 // Protected routes below
 router.get('/stats', verifyAdmin, getDashboardStats);
+// Election schedule
+router.get('/election-periods', verifyAdmin, getElectionPeriods);
+router.put('/election-periods', verifyAdmin, upsertElectionPeriod);
 
 // User management
 router.get('/users', verifyAdmin, getAllUsers);

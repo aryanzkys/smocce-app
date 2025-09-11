@@ -1,6 +1,7 @@
 const User = require('../models/User');
 const Vote = require('../models/vote');
 const jwt = require('jsonwebtoken');
+const ElectionPeriod = require('../models/electionPeriod');
 
 // Allowed bidang list (single source of truth)
 const VALID_BIDANG = [
@@ -626,6 +627,38 @@ const bulkImportUsers = async (req, res) => {
 module.exports = {
   adminLogin,
   getDashboardStats,
+  // election schedule
+  getElectionPeriods: async (req, res) => {
+    try {
+      const docs = await ElectionPeriod.find({}).lean()
+      res.json({ periods: docs })
+    } catch (e) { res.status(500).json({ message: 'Server error' }) }
+  },
+  upsertElectionPeriod: async (req, res) => {
+    try {
+      const { period, name, description, startDate, endDate } = req.body
+      if (!period || !startDate || !endDate || !name) {
+        return res.status(400).json({ message: 'period, name, startDate, endDate wajib' })
+      }
+      if (!['PJ','KETUA'].includes(period)) {
+        return res.status(400).json({ message: 'period harus PJ atau KETUA' })
+      }
+      const start = new Date(startDate)
+      const end = new Date(endDate)
+      if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+        return res.status(400).json({ message: 'Tanggal tidak valid' })
+      }
+      if (end <= start) {
+        return res.status(400).json({ message: 'endDate harus setelah startDate' })
+      }
+      const doc = await ElectionPeriod.findOneAndUpdate(
+        { period },
+        { period, name, description: description || '', startDate: start, endDate: end },
+        { new: true, upsert: true }
+      )
+      res.json({ message: 'Periode tersimpan', period: doc })
+    } catch (e) { console.error(e); res.status(500).json({ message: 'Server error' }) }
+  },
   getAllUsers,
   getAllVotes,
   getVotingResults,

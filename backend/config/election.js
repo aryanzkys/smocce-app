@@ -1,4 +1,5 @@
 // Konfigurasi Periode Pemilihan SMOCCE 2025
+const ElectionPeriod = require('../models/electionPeriod');
 const electionConfig = {
   periods: {
     PJ: {
@@ -70,6 +71,52 @@ function getNextElectionPeriod() {
   return null; // Semua periode sudah selesai
 }
 
+// Versi async yang membaca dari DB jika tersedia, fallback ke config di atas
+async function getCurrentElectionPeriodAsync() {
+  try {
+    const [pj, ketua] = await Promise.all([
+      ElectionPeriod.findOne({ period: 'PJ' }),
+      ElectionPeriod.findOne({ period: 'KETUA' }),
+    ])
+    const now = new Date();
+    const PJ = pj || electionConfig.periods.PJ
+    const KETUA = ketua || electionConfig.periods.KETUA
+
+    if (now >= new Date(PJ.startDate) && now <= new Date(PJ.endDate)) {
+      return { active: true, period: 'PJ', config: PJ }
+    }
+    if (now >= new Date(KETUA.startDate) && now <= new Date(KETUA.endDate)) {
+      return { active: true, period: 'KETUA', config: KETUA }
+    }
+    return { active: false, period: null, config: null, nextPeriod: await getNextElectionPeriodAsync() }
+  } catch (e) {
+    // Fallback sync
+    return getCurrentElectionPeriod()
+  }
+}
+
+async function getNextElectionPeriodAsync() {
+  try {
+    const [pj, ketua] = await Promise.all([
+      ElectionPeriod.findOne({ period: 'PJ' }),
+      ElectionPeriod.findOne({ period: 'KETUA' }),
+    ])
+    const now = new Date();
+    const PJ = pj || electionConfig.periods.PJ
+    const KETUA = ketua || electionConfig.periods.KETUA
+
+    if (now < new Date(PJ.startDate)) {
+      return { period: 'PJ', config: PJ }
+    }
+    if (now < new Date(KETUA.startDate)) {
+      return { period: 'KETUA', config: KETUA }
+    }
+    return null
+  } catch (e) {
+    return getNextElectionPeriod()
+  }
+}
+
 // Fungsi untuk cek apakah user sudah vote di periode tertentu
 function hasUserVotedInPeriod(userVotes, period) {
   if (!userVotes) return false;
@@ -89,5 +136,7 @@ module.exports = {
   electionConfig,
   getCurrentElectionPeriod,
   getNextElectionPeriod,
+  getCurrentElectionPeriodAsync,
+  getNextElectionPeriodAsync,
   hasUserVotedInPeriod
 };

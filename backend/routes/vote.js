@@ -1,14 +1,14 @@
 const express = require('express');
 const User = require('../models/User');
 const Vote = require('../models/vote');
-const { getCurrentElectionPeriod, hasUserVotedInPeriod } = require('../config/election');
+const { getCurrentElectionPeriod, hasUserVotedInPeriod, getCurrentElectionPeriodAsync } = require('../config/election');
 
 const router = express.Router();
 
 // Endpoint untuk mendapatkan status pemilihan saat ini
 router.get('/status', async (req, res) => {
   try {
-    const electionStatus = getCurrentElectionPeriod();
+  const electionStatus = await getCurrentElectionPeriodAsync();
     res.json(electionStatus);
   } catch (err) {
     console.error(err);
@@ -24,8 +24,8 @@ router.get('/user-status/:nisn', async (req, res) => {
     const user = await User.findOne({ nisn });
     if (!user) return res.status(404).json({ message: 'User tidak ditemukan' });
 
-    const vote = await Vote.findOne({ nisn });
-    const electionStatus = getCurrentElectionPeriod();
+  const vote = await Vote.findOne({ nisn });
+  const electionStatus = await getCurrentElectionPeriodAsync();
     
     res.json({
       user: {
@@ -51,7 +51,7 @@ router.post('/pj', async (req, res) => {
   const { nisn, pjId } = req.body;
 
   try {
-    const electionStatus = getCurrentElectionPeriod();
+  const electionStatus = await getCurrentElectionPeriodAsync();
     
     // Cek apakah periode pemilihan PJ aktif
     if (!electionStatus.active || electionStatus.period !== 'PJ') {
@@ -98,7 +98,7 @@ router.post('/ketua', async (req, res) => {
   const { nisn, ketuaId } = req.body;
 
   try {
-    const electionStatus = getCurrentElectionPeriod();
+  const electionStatus = await getCurrentElectionPeriodAsync();
     
     // Cek apakah periode pemilihan Ketua aktif
     if (!electionStatus.active || electionStatus.period !== 'KETUA') {

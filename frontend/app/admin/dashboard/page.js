@@ -108,6 +108,7 @@ export default function AdminDashboard() {
   const [results, setResults] = useState(null)
   const [candidates, setCandidates] = useState({ ketua: [], pj: {} })
   const [activeTab, setActiveTab] = useState('overview')
+  const [periods, setPeriods] = useState([])
   const [loading, setLoading] = useState(true)
   const [showExportMenu, setShowExportMenu] = useState(false)
   const [showImportModal, setShowImportModal] = useState(false)
@@ -190,6 +191,11 @@ export default function AdminDashboard() {
   const candidatesRes = await fetch('/api/admin/candidates', { headers: authHeaders() })
       const candidatesData = await candidatesRes.json()
       setCandidates(candidatesData)
+
+  // Fetch election periods
+  const periodsRes = await fetch('/api/admin/election-periods', { headers: authHeaders() })
+  const periodsData = await periodsRes.json()
+  setPeriods(periodsData.periods || [])
 
     } catch (error) {
       console.error('Error fetching data:', error)
@@ -564,6 +570,7 @@ export default function AdminDashboard() {
               { id: 'votes', label: 'Votes' },
               { id: 'candidates', label: 'Candidates' },
               { id: 'manage-candidates', label: 'Manage Candidates' },
+              { id: 'schedule', label: 'Schedule' },
               { id: 'results', label: 'Results' }
             ].map((tab) => (
               <button
@@ -859,6 +866,15 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ))}
+          </div>
+        )}
+
+        {activeTab === 'schedule' && (
+          <div className="bg-slate-900/60 backdrop-blur border border-slate-800 rounded-xl shadow-lg shadow-cyan-500/10">
+            <div className="px-4 py-5 sm:p-6">
+              <h3 className="text-lg leading-6 font-semibold text-slate-100 mb-4">Atur Jadwal Pemilihan</h3>
+              <ScheduleEditor periods={periods} onSaved={fetchData} authHeaders={authHeaders} withBusy={withBusy} />
+            </div>
           </div>
         )}
 
@@ -1362,4 +1378,126 @@ export default function AdminDashboard() {
     />
   </div>
 );
+}
+
+function ScheduleEditor({ periods, onSaved, authHeaders, withBusy }) {
+  const [pj, setPj] = useState(() => {
+    const p = periods?.find(p => p.period === 'PJ')
+    return p ? { ...p } : { period: 'PJ', name: 'Pemilihan PJ Bidang', description: 'Pemilihan Penanggung Jawab Bidang', startDate: '', endDate: '' }
+  })
+  const [ketua, setKetua] = useState(() => {
+    const k = periods?.find(p => p.period === 'KETUA')
+    return k ? { ...k } : { period: 'KETUA', name: 'Pemilihan Ketua SOC', description: 'Pemilihan Ketua SMOCCE', startDate: '', endDate: '' }
+  })
+
+  useEffect(() => {
+    const p = periods?.find(p => p.period === 'PJ')
+    const k = periods?.find(p => p.period === 'KETUA')
+    if (p) setPj(p)
+    if (k) setKetua(k)
+  }, [periods])
+
+  const save = async (data) => {
+    // Expect ISO string input with timezone, or use local and convert to ISO
+    const body = {
+      ...data,
+      startDate: data.startDate,
+      endDate: data.endDate,
+    }
+    const res = await withBusy(() => fetch('/api/admin/election-periods', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...authHeaders() },
+      body: JSON.stringify(body)
+    }), 'Saving schedule...')
+    const out = await res.json()
+    if (!res.ok) throw new Error(out.message || 'Gagal menyimpan jadwal')
+  }
+
+  const onSave = async () => {
+    try {
+      await save(pj)
+      await save(ketua)
+      alert('Jadwal berhasil disimpan')
+      onSaved && onSaved()
+    } catch (e) {
+      alert(e.message)
+    }
+  }
+
+  const Field = ({ label, value, onChange, type='datetime-local' }) => (
+    <div>
+      <label className="block text-sm font-medium text-slate-300 mb-2">{label}</label>
+      <input
+        type={type}
+        value={value ? toLocalInput(value) : ''}
+        onChange={(e) => onChange(fromLocalInput(e.target.value))}
+        className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 text-slate-100 placeholder-slate-400"
+      />
+    </div>
+  )
+
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="p-4 rounded-lg border border-slate-800 bg-slate-800/40">
+        <h4 className="font-semibold text-slate-100 mb-3">Periode PJ</h4>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Nama</label>
+            <input
+              type="text"
+              value={pj.name}
+              onChange={(e) => setPj({ ...pj, name: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 text-slate-100"
+            />
+          </div>
+          <Field label="Mulai (Jam:Menit:Detik & Tanggal)" value={pj.startDate} onChange={(v) => setPj({ ...pj, startDate: v })} />
+          <Field label="Selesai (Jam:Menit:Detik & Tanggal)" value={pj.endDate} onChange={(v) => setPj({ ...pj, endDate: v })} />
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Deskripsi</label>
+            <textarea value={pj.description || ''} onChange={(e)=> setPj({ ...pj, description: e.target.value })} rows={2} className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 text-slate-100" />
+          </div>
+        </div>
+      </div>
+      <div className="p-4 rounded-lg border border-slate-800 bg-slate-800/40">
+        <h4 className="font-semibold text-slate-100 mb-3">Periode Ketua</h4>
+        <div className="space-y-3">
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Nama</label>
+            <input
+              type="text"
+              value={ketua.name}
+              onChange={(e) => setKetua({ ...ketua, name: e.target.value })}
+              className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 text-slate-100"
+            />
+          </div>
+          <Field label="Mulai (Jam:Menit:Detik & Tanggal)" value={ketua.startDate} onChange={(v) => setKetua({ ...ketua, startDate: v })} />
+          <Field label="Selesai (Jam:Menit:Detik & Tanggal)" value={ketua.endDate} onChange={(v) => setKetua({ ...ketua, endDate: v })} />
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-2">Deskripsi</label>
+            <textarea value={ketua.description || ''} onChange={(e)=> setKetua({ ...ketua, description: e.target.value })} rows={2} className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 text-slate-100" />
+          </div>
+        </div>
+      </div>
+      <div className="md:col-span-2 flex justify-end">
+        <button onClick={onSave} className="px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-md hover:bg-cyan-500 shadow shadow-cyan-500/20">Simpan Jadwal</button>
+      </div>
+    </div>
+  )
+}
+
+function toLocalInput(value) {
+  try {
+    const d = new Date(value)
+    const tzOffset = d.getTimezoneOffset() * 60000
+    const localISO = new Date(d - tzOffset).toISOString().slice(0,16)
+    return localISO
+  } catch { return '' }
+}
+function fromLocalInput(value) {
+  // value is 'YYYY-MM-DDTHH:mm'
+  try {
+    if (!value) return ''
+    const d = new Date(value)
+    return d.toISOString()
+  } catch { return value }
 }
