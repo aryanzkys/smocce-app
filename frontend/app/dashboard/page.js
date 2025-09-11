@@ -5,6 +5,63 @@ import CandidateCard from '../../components/CandidateCard'
 import { apiService, utils } from '../../lib/api'
 import Link from 'next/link'
 
+// Move RoboticShell to module scope to keep a stable component identity across renders
+function RoboticShell({ children, now, formatTime, formatFullDate }) {
+  return (
+    <div className="relative min-h-screen overflow-hidden bg-[#070b16] text-cyan-50">
+      {/* Background */}
+      <div className="pointer-events-none absolute inset-0 opacity-100">
+        <div
+          className="absolute inset-0"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(18,219,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(18,219,255,0.05) 1px, transparent 1px)',
+            backgroundSize: '48px 48px, 48px 48px',
+            backgroundPosition: '-1px -1px',
+          }}
+        />
+        <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_20%,rgba(0,255,255,0.08),transparent_60%)]" />
+        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
+        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-indigo-600/20 blur-3xl" />
+      </div>
+
+      {/* Floating orbs */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute left-16 top-24 h-3 w-3 rounded-full bg-cyan-400 shadow-[0_0_12px_3px_rgba(34,211,238,0.6)] animate-float" />
+        <div className="absolute right-24 top-40 h-2 w-2 rounded-full bg-fuchsia-400 shadow-[0_0_10px_2px_rgba(232,121,249,0.6)] animate-float [animation-delay:400ms]" />
+        <div className="absolute left-1/3 bottom-24 h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_2px_rgba(52,211,153,0.6)] animate-float [animation-delay:800ms]" />
+      </div>
+
+      {/* Header */}
+      <div className="relative z-10 border-b border-cyan-500/10 bg-black/20 backdrop-blur supports-[backdrop-filter]:backdrop-blur-md">
+        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
+          <div className="flex items-center gap-3">
+            <div className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_2px_rgba(16,185,129,0.6)]" />
+            <div>
+              <h1 className="text-xl font-bold tracking-wide"><span className="bg-gradient-to-r from-cyan-300 via-white to-fuchsia-300 bg-clip-text text-transparent">SMOCCE 2025</span></h1>
+              <p className="text-[11px] text-cyan-300/60">Sistem Pemilihan Ketua SOC & PJ Bidang</p>
+            </div>
+          </div>
+          <div className="text-right">
+            <div className="font-mono text-sm text-cyan-100">{formatTime(now)} WIB</div>
+            <div className="text-[11px] text-cyan-300/70">{formatFullDate(now)}</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Body */}
+      <div className="relative z-10 mx-auto max-w-7xl px-4 py-8">
+        {children}
+      </div>
+
+      <style jsx>{`
+        @keyframes float { 0% { transform: translateY(0) } 50% { transform: translateY(-6px) } 100% { transform: translateY(0) } }
+        .animate-float { animation: float 4s ease-in-out infinite; }
+      `}</style>
+    </div>
+  )
+}
+
 export default function DashboardPage() {
   const router = useRouter()
   const [user, setUser] = useState(null)
@@ -179,63 +236,11 @@ export default function DashboardPage() {
     startRaf()
   }
 
-  const RoboticShell = ({ children }) => (
-    <div className="relative min-h-screen overflow-hidden bg-[#070b16] text-cyan-50">
-      {/* Background */}
-      <div className="pointer-events-none absolute inset-0 opacity-100">
-        <div
-          className="absolute inset-0"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(18,219,255,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(18,219,255,0.05) 1px, transparent 1px)',
-            backgroundSize: '48px 48px, 48px 48px',
-            backgroundPosition: '-1px -1px',
-          }}
-        />
-        <div className="absolute inset-0 bg-[radial-gradient(80%_60%_at_50%_20%,rgba(0,255,255,0.08),transparent_60%)]" />
-        <div className="absolute -top-24 -left-24 h-72 w-72 rounded-full bg-cyan-500/20 blur-3xl" />
-        <div className="absolute bottom-0 right-0 h-80 w-80 rounded-full bg-indigo-600/20 blur-3xl" />
-      </div>
-
-      {/* Floating orbs */}
-      <div className="pointer-events-none absolute inset-0">
-        <div className="absolute left-16 top-24 h-3 w-3 rounded-full bg-cyan-400 shadow-[0_0_12px_3px_rgba(34,211,238,0.6)] animate-float" />
-        <div className="absolute right-24 top-40 h-2 w-2 rounded-full bg-fuchsia-400 shadow-[0_0_10px_2px_rgba(232,121,249,0.6)] animate-float [animation-delay:400ms]" />
-        <div className="absolute left-1/3 bottom-24 h-2.5 w-2.5 rounded-full bg-emerald-400 shadow-[0_0_10px_2px_rgba(52,211,153,0.6)] animate-float [animation-delay:800ms]" />
-      </div>
-
-      {/* Header */}
-      <div className="relative z-10 border-b border-cyan-500/10 bg-black/20 backdrop-blur supports-[backdrop-filter]:backdrop-blur-md">
-        <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4">
-          <div className="flex items-center gap-3">
-            <div className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_10px_2px_rgba(16,185,129,0.6)]" />
-            <div>
-              <h1 className="text-xl font-bold tracking-wide"><span className="bg-gradient-to-r from-cyan-300 via-white to-fuchsia-300 bg-clip-text text-transparent">SMOCCE 2025</span></h1>
-              <p className="text-[11px] text-cyan-300/60">Sistem Pemilihan Ketua SOC & PJ Bidang</p>
-            </div>
-          </div>
-          <div className="text-right">
-            <div className="font-mono text-sm text-cyan-100">{formatTime(now)} WIB</div>
-            <div className="text-[11px] text-cyan-300/70">{formatFullDate(now)}</div>
-          </div>
-        </div>
-      </div>
-
-      {/* Body */}
-      <div className="relative z-10 mx-auto max-w-7xl px-4 py-8">
-        {children}
-      </div>
-
-      <style jsx>{`
-        @keyframes float { 0% { transform: translateY(0) } 50% { transform: translateY(-6px) } 100% { transform: translateY(0) } }
-        .animate-float { animation: float 4s ease-in-out infinite; }
-      `}</style>
-    </div>
-  )
+  
 
   if (!user || loading) {
     return (
-      <RoboticShell>
+  <RoboticShell now={now} formatTime={formatTime} formatFullDate={formatFullDate}>
         <div className="flex items-center justify-center py-24">
           <div className="overflow-hidden rounded-2xl border border-cyan-500/20 bg-black/30 p-8">
             <div className="mx-auto flex max-w-sm items-center gap-4">
@@ -286,7 +291,7 @@ export default function DashboardPage() {
     const percentStart = totalStart ? Math.min(1, Math.max(0, elapsedStart / totalStart)) : 0
 
     return (
-      <RoboticShell>
+  <RoboticShell now={now} formatTime={formatTime} formatFullDate={formatFullDate}>
         <div onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} style={{ perspective: '1200px' }} className="group">
           <div className="relative rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-white/5 to-cyan-600/5 p-6 shadow-2xl backdrop-blur-xl" style={{ transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) scale(${tilt.s})`, transformStyle: 'preserve-3d', transition: 'transform 120ms ease' }}>
             <div className="mb-6 flex items-center justify-between">
@@ -366,7 +371,7 @@ export default function DashboardPage() {
     const percent = total ? Math.min(1, Math.max(0, elapsed / total)) : 0
 
     return (
-      <RoboticShell>
+  <RoboticShell now={now} formatTime={formatTime} formatFullDate={formatFullDate}>
         {/* Info Card */}
         <div onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} className="group" style={{ perspective: '1200px' }}>
           <div className="relative mb-6 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-white/5 to-cyan-600/5 p-6 shadow-2xl backdrop-blur-xl" style={{ transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) scale(${tilt.s})`, transformStyle: 'preserve-3d', transition: 'transform 120ms ease' }}>
@@ -477,7 +482,7 @@ export default function DashboardPage() {
     const needsPJFirst = !userVoteStatus?.vote?.pjCompleted
 
     return (
-      <RoboticShell>
+  <RoboticShell now={now} formatTime={formatTime} formatFullDate={formatFullDate}>
         <div onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} className="group" style={{ perspective: '1200px' }}>
           <div className="relative mb-6 rounded-2xl border border-cyan-500/20 bg-gradient-to-br from-white/5 to-cyan-600/5 p-6 shadow-2xl backdrop-blur-xl" style={{ transform: `rotateX(${tilt.rx}deg) rotateY(${tilt.ry}deg) scale(${tilt.s})`, transformStyle: 'preserve-3d', transition: 'transform 120ms ease' }}>
             <div className="mb-4 flex items-center justify-between">
