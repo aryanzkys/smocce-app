@@ -67,7 +67,7 @@ const nextConfig = {
   compress: true,
   
   // Build optimization
-  swcMinify: true,
+  // swcMinify is on by default in modern Next.js; removed to avoid warnings
   
   // Static optimization
   trailingSlash: false,
