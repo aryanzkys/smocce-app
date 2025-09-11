@@ -144,16 +144,7 @@ export default function AdminDashboard() {
     return token ? { Authorization: `Bearer ${token}` } : {};
   }, [])
 
-  useEffect(() => {
-    // Check admin authentication
-    const adminAuth = localStorage.getItem('adminAuth')
-    if (!adminAuth) {
-      router.push('/admin/login')
-      return
-    }
-
-    fetchData()
-  }, [fetchData, router])
+  // NOTE: fetchData must be defined before using it in useEffect deps
 
   // Close export dropdown on outside click
   const exportPanelRef = useRef(null)
@@ -203,6 +194,17 @@ export default function AdminDashboard() {
       setLoading(false)
     }
   }, [authHeaders])
+
+  // Auth check + initial load (placed AFTER fetchData is defined)
+  useEffect(() => {
+    const adminAuth = localStorage.getItem('adminAuth')
+    if (!adminAuth) {
+      router.push('/admin/login')
+      return
+    }
+
+    fetchData()
+  }, [fetchData, router])
 
   const handleLogout = () => {
   localStorage.removeItem('adminAuth')

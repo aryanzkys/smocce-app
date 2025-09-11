@@ -13,7 +13,14 @@ export default function AdminLoginPage() {
     e.preventDefault()
 
     try {
-      const res = await apiService.adminLogin({ username, password })
+      // Try admin-specific login; fallback to general auth login if route differs
+      let res
+      try {
+        res = await apiService.adminLogin({ username, password })
+      } catch (err) {
+        // fallback
+        res = await apiService.login({ username, password })
+      }
       if (res?.token) {
         localStorage.setItem('adminToken', res.token)
         localStorage.setItem('adminAuth', 'true') // fallback flag

@@ -1,7 +1,9 @@
 // API Configuration and Utilities for SMOCCE 2025
 
 // Prefer same-origin relative API on Netlify (handled by netlify.toml redirects)
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const rawBase = process.env.NEXT_PUBLIC_API_URL || '';
+// Normalize base to avoid double slashes and default to same-origin
+const API_BASE_URL = rawBase.replace(/\/$/, '');
 
 // API Client with error handling
 class ApiClient {
@@ -10,7 +12,7 @@ class ApiClient {
   }
 
   async request(endpoint, options = {}) {
-    const url = `${this.baseURL}${endpoint}`;
+  const url = `${this.baseURL}${endpoint}`;
     
     const config = {
       headers: {
@@ -21,12 +23,14 @@ class ApiClient {
     };
 
     // Add auth token if available
-    if (typeof window !== 'undefined') {
-      const token = localStorage.getItem('token');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+    try {
+      if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('token') || localStorage.getItem('adminToken');
+        if (token) {
+          config.headers.Authorization = `Bearer ${token}`;
+        }
       }
-    }
+    } catch {}
 
     try {
       const response = await fetch(url, config);
