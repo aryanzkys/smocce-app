@@ -19,7 +19,7 @@
 # Redirect API to serverless function
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/api/:splat"
+  to = "/.netlify/functions/api/api/:splat"
   status = 200
 
 # Next.js handles routing; no SPA fallback needed
