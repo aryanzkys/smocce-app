@@ -1,5 +1,5 @@
 'use client'
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import CandidateCard from '../../components/CandidateCard'
 import { apiService, utils } from '../../lib/api'
@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const [error, setError] = useState(null)
   const [now, setNow] = useState(new Date())
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, s: 1 })
+  const mountNowRef = useRef(new Date())
 
   useEffect(() => {
     const saved = localStorage.getItem('user')
@@ -35,11 +36,19 @@ export default function DashboardPage() {
   }, [])
 
   const formatFullDate = (d) =>
-    d.toLocaleDateString('id-ID', {
-      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric'
-    })
+    d.toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
   const formatTime = (d) =>
     d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+
+  const toParts = (ms) => {
+    const clamp = Math.max(0, ms)
+    const d = Math.floor(clamp / (24 * 3600e3))
+    const h = Math.floor((clamp % (24 * 3600e3)) / 3600e3)
+    const m = Math.floor((clamp % 3600e3) / 60e3)
+    const s = Math.floor((clamp % 60e3) / 1e3)
+    return { d, h, m, s }
+  }
+  const pad = (n) => String(n).padStart(2, '0')
 
   const fetchElectionData = async (nisn) => {
     try {
@@ -203,8 +212,35 @@ export default function DashboardPage() {
   const bidangCandidates = candidates.pj[user.bidang] || []
   const finished = !!(userVoteStatus?.vote?.pjCompleted && userVoteStatus?.vote?.ketuaCompleted)
 
+  // Helper for ring
+  const Ring = ({ percent = 0, color = '#22d3ee', size = 88, stroke = 8, children }) => {
+    const r = (size - stroke) / 2
+    const c = 2 * Math.PI * r
+    const p = Math.max(0, Math.min(1, percent))
+    const dash = c * p
+    const gap = c - dash
+    return (
+      <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} className="shrink-0">
+        <circle cx={size/2} cy={size/2} r={r} stroke="#0b1224" strokeWidth={stroke} fill="none" />
+        <circle cx={size/2} cy={size/2} r={r} stroke={color} strokeWidth={stroke} strokeLinecap="round" fill="none" strokeDasharray={`${dash} ${gap}`} transform={`rotate(-90 ${size/2} ${size/2})`} />
+        {children}
+      </svg>
+    )
+  }
+
   // Tidak ada periode aktif
   if (electionStatus && !electionStatus.active) {
+    const next = electionStatus.nextPeriod?.config
+    const start = next ? new Date(next.startDate) : null
+    const untilStartMs = start ? start - now : 0
+    const parts = toParts(untilStartMs)
+
+    // Progress to start based on time since page open
+    const mount = mountNowRef.current
+    const totalStart = start && start > mount ? start - mount : 0
+    const elapsedStart = start && start > mount ? now - mount : 0
+    const percentStart = totalStart ? Math.min(1, Math.max(0, elapsedStart / totalStart)) : 0
+
     return (
       <RoboticShell>
         <div onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} style={{ perspective: '1200px' }} className="group">
@@ -214,23 +250,31 @@ export default function DashboardPage() {
               <button onClick={handleLogout} className="rounded-md border border-cyan-500/30 bg-black/40 px-3 py-1.5 text-xs font-medium text-cyan-100 transition hover:bg-cyan-500/10">Logout</button>
             </div>
 
-            {electionStatus.nextPeriod ? (
+            {next ? (
               <div>
                 <h2 className="text-xl font-bold text-cyan-100">Periode Pemilihan Belum Dimulai</h2>
-                <p className="mt-1 text-cyan-300/70">Silakan kembali pada jadwal berikut.</p>
+                <p className="mt-1 text-cyan-300/70">Periode berikutnya: <span className="font-medium">{next.name}</span></p>
 
-                <div className="mt-5 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4">
-                    <div className="text-[11px] text-cyan-300/60">Periode Berikutnya</div>
-                    <div className="text-cyan-100">{electionStatus.nextPeriod.config.name}</div>
-                    <div className="text-sm text-cyan-200/80 mt-1">
-                      {formatFullDate(new Date(electionStatus.nextPeriod.config.startDate))}
+                <div className="mt-5 grid gap-4 md:grid-cols-3">
+                  <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4 flex items-center gap-4">
+                    <Ring percent={percentStart} color="#22d3ee">
+                      <text x="50%" y="52%" textAnchor="middle" fill="#a5f3fc" fontSize="10" fontFamily="monospace">{Math.round(percentStart*100)}%</text>
+                    </Ring>
+                    <div>
+                      <div className="text-[11px] text-cyan-300/60">Mulai dalam</div>
+                      <div className="font-mono text-cyan-100 text-sm">{parts.d}h {pad(parts.h)}j {pad(parts.m)}m {pad(parts.s)}d</div>
+                      <div className="text-[11px] text-cyan-300/70">{formatFullDate(start)}</div>
                     </div>
                   </div>
                   <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4">
                     <div className="text-[11px] text-cyan-300/60">Informasi Pemilih</div>
                     <div className="text-sm text-cyan-200/90">NISN: <span className="font-mono">{user.nisn}</span></div>
                     <div className="text-sm text-cyan-200/90">Bidang: <span className="text-fuchsia-300 font-medium">{user.bidang}</span></div>
+                  </div>
+                  <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4">
+                    <div className="text-[11px] text-cyan-300/60">Waktu Saat Ini</div>
+                    <div className="text-cyan-100">{formatTime(now)} WIB</div>
+                    <div className="text-[11px] text-cyan-300/70">{formatFullDate(now)}</div>
                   </div>
                 </div>
               </div>
@@ -242,25 +286,6 @@ export default function DashboardPage() {
                 ) : (
                   <p className="mt-1 text-amber-300/90">Anda telah melewatkan pemilihan dan tidak dapat melakukan pemilihan lagi.</p>
                 )}
-
-                <div className="mt-5 grid gap-4 md:grid-cols-3">
-                  <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4">
-                    <div className="text-[11px] text-cyan-300/60">NISN</div>
-                    <div className="font-mono text-cyan-100">{user.nisn}</div>
-                  </div>
-                  <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4">
-                    <div className="text-[11px] text-cyan-300/60">Bidang</div>
-                    <div className="text-cyan-100">{user.bidang}</div>
-                  </div>
-                  <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4">
-                    <div className="text-[11px] text-cyan-300/60">Waktu</div>
-                    <div className="text-cyan-100">{formatTime(now)} WIB</div>
-                  </div>
-                </div>
-
-                <div className="mt-6 text-sm text-cyan-300/60">
-                  Butuh bantuan? Hubungi panitia untuk informasi lebih lanjut.
-                </div>
               </div>
             )}
           </div>
@@ -275,6 +300,15 @@ export default function DashboardPage() {
 
   // Periode PJ aktif
   if (electionStatus && electionStatus.active && electionStatus.period === 'PJ') {
+    const cfg = electionStatus.config || {}
+    const start = cfg.startDate ? new Date(cfg.startDate) : null
+    const end = cfg.endDate ? new Date(cfg.endDate) : null
+    const remainingMs = end ? end - now : 0
+    const parts = toParts(remainingMs)
+    const total = start && end ? end - start : 0
+    const elapsed = start ? now - start : 0
+    const percent = total ? Math.min(1, Math.max(0, elapsed / total)) : 0
+
     return (
       <RoboticShell>
         {/* Info Card */}
@@ -288,9 +322,37 @@ export default function DashboardPage() {
               <button onClick={handleLogout} className="rounded-md border border-cyan-500/30 bg-black/40 px-3 py-1.5 text-xs font-medium text-cyan-100 transition hover:bg-cyan-500/10">Logout</button>
             </div>
 
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4 flex items-center gap-4">
+                <Ring percent={percent} color="#22d3ee">
+                  <text x="50%" y="52%" textAnchor="middle" fill="#a5f3fc" fontSize="10" fontFamily="monospace">{Math.round(percent*100)}%</text>
+                </Ring>
+                <div>
+                  <div className="text-[11px] text-cyan-300/60">Berjalan</div>
+                  <div className="text-sm text-cyan-100">Progress menuju selesai</div>
+                  <div className="text-[11px] text-cyan-300/70">Selesai: {formatFullDate(end)}</div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4 flex items-center gap-4">
+                <Ring percent={Math.max(0, Math.min(1, 1 - (remainingMs / (total || 1))))} color="#a78bfa">
+                  <text x="50%" y="52%" textAnchor="middle" fill="#ddd6fe" fontSize="10" fontFamily="monospace">{pad(parts.h)}:{pad(parts.m)}:{pad(parts.s)}</text>
+                </Ring>
+                <div>
+                  <div className="text-[11px] text-cyan-300/60">Berakhir dalam</div>
+                  <div className="font-mono text-cyan-100 text-sm">{parts.d}h {pad(parts.h)}j {pad(parts.m)}m {pad(parts.s)}d</div>
+                  <div className="text-[11px] text-cyan-300/70">{formatTime(now)} WIB</div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4">
+                <div className="text-[11px] text-cyan-300/60">Waktu Mulai</div>
+                <div className="text-sm text-cyan-100">{formatFullDate(start)}</div>
+                <div className="text-[11px] text-cyan-300/70">{start && new Date(start).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</div>
+              </div>
+            </div>
+
             {/* Status */}
             {userVoteStatus?.vote.pjCompleted && (
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+              <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4">
                 <div className="flex items-center gap-3 text-emerald-100">
                   <span className="h-2 w-2 rounded-full bg-emerald-400" />
                   <div>
@@ -335,9 +397,7 @@ export default function DashboardPage() {
                   <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4 mb-5 text-yellow-100">
                     <div className="text-sm">⚠️ Setelah submit, pilihan PJ Anda tidak dapat diubah.</div>
                   </div>
-                  <button onClick={handlePJSubmit} className="rounded-xl bg-gradient-to-r from-indigo-500 to-indigo-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-105">
-                    🗳️ Submit Pilihan PJ
-                  </button>
+                  <button onClick={handlePJSubmit} className="rounded-2xl bg-gradient-to-r from-indigo-500 to-indigo-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-105">🗳️ Submit Pilihan PJ</button>
                 </div>
               </div>
             )}
@@ -349,6 +409,15 @@ export default function DashboardPage() {
 
   // Periode Ketua aktif
   if (electionStatus && electionStatus.active && electionStatus.period === 'KETUA') {
+    const cfg = electionStatus.config || {}
+    const start = cfg.startDate ? new Date(cfg.startDate) : null
+    const end = cfg.endDate ? new Date(cfg.endDate) : null
+    const remainingMs = end ? end - now : 0
+    const parts = toParts(remainingMs)
+    const total = start && end ? end - start : 0
+    const elapsed = start ? now - start : 0
+    const percent = total ? Math.min(1, Math.max(0, elapsed / total)) : 0
+
     return (
       <RoboticShell>
         <div onMouseMove={onMouseMove} onMouseLeave={onMouseLeave} className="group" style={{ perspective: '1200px' }}>
@@ -361,15 +430,36 @@ export default function DashboardPage() {
               <button onClick={handleLogout} className="rounded-md border border-cyan-500/30 bg-black/40 px-3 py-1.5 text-xs font-medium text-cyan-100 transition hover:bg-cyan-500/10">Logout</button>
             </div>
 
-            {/* Status */}
-            {userVoteStatus?.vote.pjCompleted && (
-              <div className="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-100">
-                <div className="text-sm"><strong>PJ {user.bidang}</strong>: sudah memilih pada {new Date(userVoteStatus.vote.pjVotedAt).toLocaleDateString('id-ID')}</div>
+            <div className="grid gap-4 md:grid-cols-3">
+              <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4 flex items-center gap-4">
+                <Ring percent={percent} color="#22d3ee">
+                  <text x="50%" y="52%" textAnchor="middle" fill="#a5f3fc" fontSize="10" fontFamily="monospace">{Math.round(percent*100)}%</text>
+                </Ring>
+                <div>
+                  <div className="text-[11px] text-cyan-300/60">Berjalan</div>
+                  <div className="text-sm text-cyan-100">Progress menuju selesai</div>
+                  <div className="text-[11px] text-cyan-300/70">Selesai: {formatFullDate(end)}</div>
+                </div>
               </div>
-            )}
+              <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4 flex items-center gap-4">
+                <Ring percent={Math.max(0, Math.min(1, 1 - (remainingMs / (total || 1))))} color="#a78bfa">
+                  <text x="50%" y="52%" textAnchor="middle" fill="#ddd6fe" fontSize="10" fontFamily="monospace">{pad(parts.h)}:{pad(parts.m)}:{pad(parts.s)}</text>
+                </Ring>
+                <div>
+                  <div className="text-[11px] text-cyan-300/60">Berakhir dalam</div>
+                  <div className="font-mono text-cyan-100 text-sm">{parts.d}h {pad(parts.h)}j {pad(parts.m)}m {pad(parts.s)}d</div>
+                  <div className="text-[11px] text-cyan-300/70">{formatTime(now)} WIB</div>
+                </div>
+              </div>
+              <div className="rounded-xl border border-cyan-500/20 bg-black/30 p-4">
+                <div className="text-[11px] text-cyan-300/60">Waktu Mulai</div>
+                <div className="text-sm text-cyan-100">{formatFullDate(start)}</div>
+                <div className="text-[11px] text-cyan-300/70">{start && new Date(start).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' })} WIB</div>
+              </div>
+            </div>
 
             {userVoteStatus?.vote.ketuaCompleted && (
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-100">
+              <div className="mt-4 rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-emerald-100">
                 <div className="text-sm font-semibold">Anda Sudah Menyelesaikan Pemilihan</div>
                 <div className="text-xs text-emerald-200/80">Waktu: {new Date(userVoteStatus.vote.ketuaVotedAt).toLocaleString('id-ID')}</div>
               </div>
@@ -408,7 +498,7 @@ export default function DashboardPage() {
                   <div className="rounded-xl border border-yellow-500/30 bg-yellow-500/10 p-4 mb-5 text-yellow-100">
                     <div className="text-sm">⚠️ Setelah submit, pilihan Ketua Anda tidak dapat diubah.</div>
                   </div>
-                  <button onClick={handleKetuaSubmit} className="rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-105">🗳️ Submit Pilihan Ketua</button>
+                  <button onClick={handleKetuaSubmit} className="rounded-2xl bg-gradient-to-r from-blue-500 to-blue-600 px-6 py-3 font-semibold text-white shadow-lg transition hover:scale-105">🗳️ Submit Pilihan Ketua</button>
                 </div>
               </div>
             )}
