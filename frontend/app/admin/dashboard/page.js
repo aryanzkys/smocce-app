@@ -304,6 +304,29 @@ export default function AdminDashboard() {
     } catch (e) { alert('Error menghapus user') }
   }
 
+  // Hapus vote per-periode atau semua untuk NISN tertentu
+  const deleteVoteForUser = async (nisn, period = 'ALL') => {
+    const label = period === 'PJ' ? 'vote PJ' : period === 'KETUA' ? 'vote Ketua' : 'SEMUA vote'
+    if (!confirm(`Hapus ${label} untuk NISN ${nisn}?`)) return
+    try {
+      const res = await withBusy(() => fetch(`/api/admin/users/${nisn}/vote/by-period?period=${encodeURIComponent(period)}` , {
+        method: 'DELETE',
+        headers: authHeaders(),
+      }), 'Deleting vote...')
+      if (res.ok) {
+        alert('Vote berhasil dihapus')
+        fetchData()
+      } else {
+        let msg = 'Gagal menghapus vote'
+        try { const data = await res.json(); if (data?.message) msg = data.message } catch {}
+        alert(msg)
+      }
+    } catch (e) {
+      console.error('Error deleting vote:', e)
+      alert('Error menghapus vote')
+    }
+  }
+
   const handleFileUpload = (event) => {
     const file = event.target.files[0]
     if (file) {
