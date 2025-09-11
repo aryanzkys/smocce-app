@@ -124,3 +124,7 @@ playground-*.mongodb.js
 # Backup files
 *.backup
 *.bak
+
+# Monorepo nested lockfiles (use root lockfile only)
+/frontend/package-lock.json
+/backend/package-lock.json
