@@ -164,14 +164,13 @@ export const apiService = {
   },
 
   async getVoteStatus() {
-    return api.get(apiEndpoints.vote.status);
+    // Force fresh status (avoid CDN/browser caching)
+    return api.get(apiEndpoints.vote.status, { cache: 'no-store' });
   },
 
   async getVoteResults() {
     return api.get(apiEndpoints.vote.results);
   },
-
-  // Admin
   async adminLogin(credentials) {
     return api.post(apiEndpoints.admin.login, credentials);
   },
