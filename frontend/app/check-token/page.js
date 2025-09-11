@@ -93,6 +93,8 @@ export default function CheckToken() {
     } catch {}
   }
 
+  const electionStatus = result?.electionStatus || { ketua: result?.hasVoted || false, pj: result?.hasVoted || false }
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#070b16] text-cyan-50">
       {/* Background layers */}
@@ -262,12 +264,27 @@ export default function CheckToken() {
                         <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(120deg,transparent,rgba(16,185,129,0.08),transparent)]" />
                       </div>
                     </div>
-                    <div className="col-span-2">
-                      <div className="flex items-center gap-2 text-sm">
-                        <span className={`h-2 w-2 rounded-full ${result.hasVoted ? "bg-emerald-400" : "bg-amber-400"} shadow-[0_0_10px_2px_rgba(0,0,0,0.0)]`} />
-                        <span className={`font-medium ${result.hasVoted ? "text-emerald-200" : "text-amber-200"}`}>
-                          {result.hasVoted ? "Sudah Vote" : "Belum Vote"}
-                        </span>
+                    {/* Per-election status */}
+                    <div className="col-span-2 grid grid-cols-2 gap-3">
+                      <div className="rounded-lg border border-cyan-500/20 bg-black/30 p-3">
+                        <div className="mb-1 text-[11px] text-cyan-300/70">Status Pemilihan</div>
+                        <div className="flex items-center gap-2">
+                          <span className={`h-2 w-2 rounded-full ${electionStatus.ketua ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                          <div>
+                            <div className="text-sm font-medium text-cyan-100">Ketua</div>
+                            <div className="text-xs text-cyan-300/60">{electionStatus.ketua ? 'Sudah memilih' : 'Belum memilih'}</div>
+                          </div>
+                        </div>
+                      </div>
+                      <div className="rounded-lg border border-cyan-500/20 bg-black/30 p-3">
+                        <div className="mb-1 text-[11px] text-cyan-300/70">Status Pemilihan</div>
+                        <div className="flex items-center gap-2">
+                          <span className={`h-2 w-2 rounded-full ${electionStatus.pj ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                          <div>
+                            <div className="text-sm font-medium text-cyan-100">PJ</div>
+                            <div className="text-xs text-cyan-300/60">{electionStatus.pj ? 'Sudah memilih' : 'Belum memilih'}</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   </div>

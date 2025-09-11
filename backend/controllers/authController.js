@@ -1,4 +1,5 @@
 const User = require('../models/User');
+const Vote = require('../models/vote');
 
 const login = async (req, res) => {
   const { nisn, token } = req.body;
@@ -41,11 +42,38 @@ const checkToken = async (req, res) => {
       return res.status(404).json({ message: 'NISN tidak ditemukan' });
     }
 
+    // Try to read vote progress to expose per-election status (Ketua & PJ)
+    let ketua = false;
+    let pj = false;
+    let ketuaVotedAt = null;
+    let pjVotedAt = null;
+
+    try {
+      const vote = await Vote.findOne({ nisn: user.nisn });
+      if (vote) {
+        ketua = Boolean(vote.ketuaCompleted || vote.ketuaVotedAt || vote.ketuaId);
+        pj = Boolean(vote.pjCompleted || vote.pjVotedAt || vote.pjId);
+        ketuaVotedAt = vote.ketuaVotedAt || null;
+        pjVotedAt = vote.pjVotedAt || null;
+      }
+    } catch (e) {
+      // Non-fatal; keep defaults
+      console.error('checkToken vote lookup error:', e);
+    }
+
     res.json({
       nisn: user.nisn,
       token: user.token,
       bidang: user.bidang,
-      hasVoted: user.hasVoted
+      hasVoted: user.hasVoted || ketua || pj, // backward compat overall flag
+      electionStatus: {
+        ketua,
+        pj,
+      },
+      votedAt: {
+        ketua: ketuaVotedAt,
+        pj: pjVotedAt,
+      },
     });
   } catch (error) {
     console.error(error);
