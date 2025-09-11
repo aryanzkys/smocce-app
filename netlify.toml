@@ -16,6 +16,10 @@
   node_bundler = "esbuild"
   included_files = ["../backend/**"]
 
+# Ensure Next.js is handled by the official Netlify plugin
+[[plugins]]
+  package = "@netlify/plugin-nextjs"
+
 # Redirect API to serverless function
 [[redirects]]
   from = "/api/*"
