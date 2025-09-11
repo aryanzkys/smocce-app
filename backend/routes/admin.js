@@ -15,7 +15,8 @@ const {
   bulkImportUsers,
   regenerateUserToken,
   updateUser,
-  deleteUser
+  deleteUser,
+  deleteVoteForUser
 } = require('../controllers/adminController');
 const { verifyAdmin } = require('../middleware/auth');
 
@@ -51,6 +52,8 @@ router.get('/results', verifyAdmin, getVotingResults);
 
 // Reset user vote (for testing)
 router.delete('/users/:nisn/vote', verifyAdmin, resetUserVote);
+// Delete vote by period or all: /users/:nisn/vote?period=PJ|KETUA|ALL
+router.delete('/users/:nisn/vote/by-period', verifyAdmin, deleteVoteForUser);
 
 // Regenerate user token
 router.put('/users/:nisn/token', verifyAdmin, regenerateUserToken);

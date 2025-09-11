@@ -776,6 +776,7 @@ export default function AdminDashboard() {
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Ketua ID</th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">PJ ID</th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Time</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="bg-transparent divide-y divide-slate-800">
@@ -783,10 +784,26 @@ export default function AdminDashboard() {
                       <tr key={index} className="hover:bg-slate-800/40">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-100">{vote.nisn}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">{vote.bidang}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">{vote.ketuaId}</td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">{vote.pjId}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">{vote.ketuaId || '-'}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">{vote.pjId || '-'}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">
                           {new Date(vote.createdAt).toLocaleString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                          <div className="flex flex-wrap gap-2">
+                            <button
+                              onClick={() => deleteVoteForUser(vote.nisn, 'PJ')}
+                              className="px-2 py-1 text-xs rounded bg-amber-500/20 text-amber-300 border border-amber-700 hover:bg-amber-500/30"
+                            >Hapus PJ</button>
+                            <button
+                              onClick={() => deleteVoteForUser(vote.nisn, 'KETUA')}
+                              className="px-2 py-1 text-xs rounded bg-indigo-500/20 text-indigo-300 border border-indigo-700 hover:bg-indigo-500/30"
+                            >Hapus Ketua</button>
+                            <button
+                              onClick={() => deleteVoteForUser(vote.nisn, 'ALL')}
+                              className="px-2 py-1 text-xs rounded bg-rose-500/20 text-rose-300 border border-rose-700 hover:bg-rose-500/30"
+                            >Hapus Semua</button>
+                          </div>
                         </td>
                       </tr>
                     ))}

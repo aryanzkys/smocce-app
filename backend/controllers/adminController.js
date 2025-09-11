@@ -689,5 +689,72 @@ module.exports = {
   bulkImportUsers,
   regenerateUserToken,
   updateUser,
-  deleteUser
+  deleteUser,
+  // Delete votes for a user (by period or all)
+  deleteVoteForUser: async (req, res) => {
+    try {
+      const { nisn } = req.params
+      const period = (req.query.period || 'ALL').toUpperCase()
+
+      if (!['PJ', 'KETUA', 'ALL'].includes(period)) {
+        return res.status(400).json({ message: 'period harus salah satu dari PJ, KETUA, atau ALL' })
+      }
+
+      const user = await User.findOne({ nisn })
+      if (!user) return res.status(404).json({ message: 'User not found' })
+
+      let vote = await Vote.findOne({ nisn })
+
+      if (!vote) {
+        // If no vote exists and admin asked to delete ALL, still ensure hasVoted reset
+        if (period === 'ALL') {
+          user.hasVoted = false
+          await user.save()
+          return res.json({ message: 'Tidak ada vote untuk dihapus. Status user disetel ke belum memilih.' })
+        }
+        return res.status(404).json({ message: 'Vote tidak ditemukan' })
+      }
+
+      let alsoClearedKetua = false
+      if (period === 'ALL') {
+        await Vote.deleteOne({ nisn })
+        user.hasVoted = false
+        await user.save()
+        return res.json({ message: 'Semua vote pengguna dihapus dan status direset', period })
+      }
+
+      if (period === 'PJ') {
+        // Hapus data PJ; untuk konsistensi alur, jika sudah ada ketua, hapus juga ketua
+        vote.pjId = undefined
+        vote.pjCompleted = false
+        vote.pjVotedAt = null
+        if (vote.ketuaCompleted) {
+          vote.ketuaId = undefined
+          vote.ketuaCompleted = false
+          vote.ketuaVotedAt = null
+          alsoClearedKetua = true
+        }
+      } else if (period === 'KETUA') {
+        vote.ketuaId = undefined
+        vote.ketuaCompleted = false
+        vote.ketuaVotedAt = null
+      }
+
+      // Jika tidak ada progres sama sekali, hapus dokumen vote agar bersih
+      if (!vote.pjCompleted && !vote.ketuaCompleted) {
+        await Vote.deleteOne({ nisn })
+      } else {
+        await vote.save()
+      }
+
+      // Update flag hasVoted (hanya true jika keduanya completed)
+      user.hasVoted = !!(vote.pjCompleted && vote.ketuaCompleted)
+      await user.save()
+
+      return res.json({ message: `Vote periode ${period} berhasil dihapus`, period, alsoClearedKetua })
+    } catch (e) {
+      console.error(e)
+      res.status(500).json({ message: 'Server error' })
+    }
+  }
 };
