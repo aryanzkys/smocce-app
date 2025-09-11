@@ -17,6 +17,12 @@ export default function DashboardPage() {
   const [error, setError] = useState(null)
   const [now, setNow] = useState(new Date())
   const [tilt, setTilt] = useState({ rx: 0, ry: 0, s: 1 })
+  const targetTiltRef = useRef({ rx: 0, ry: 0, s: 1 })
+  const rafRef = useRef(null)
+  const [reducedMotion, setReducedMotion] = useState(false)
+  const [finePointer, setFinePointer] = useState(true)
+  const MAX_ANGLE = 3.5
+  const SCALE_ACTIVE = 1.003
   const mountNowRef = useRef(new Date())
 
   useEffect(() => {
@@ -33,6 +39,14 @@ export default function DashboardPage() {
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(t)
+  }, [])
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    try {
+      setReducedMotion(window.matchMedia('(prefers-reduced-motion: reduce)').matches)
+      setFinePointer(window.matchMedia('(pointer: fine)').matches)
+    } catch {}
   }, [])
 
   const formatFullDate = (d) =>
@@ -123,17 +137,47 @@ export default function DashboardPage() {
     router.push('/')
   }
 
+  const startRaf = () => {
+    if (rafRef.current) return
+    const loop = () => {
+      setTilt((prev) => {
+        const t = targetTiltRef.current
+        const rx = prev.rx + (t.rx - prev.rx) * 0.12
+        const ry = prev.ry + (t.ry - prev.ry) * 0.12
+        const s = prev.s + (t.s - prev.s) * 0.08
+        const done = Math.abs(rx - t.rx) < 0.01 && Math.abs(ry - t.ry) < 0.01 && Math.abs(s - t.s) < 0.002
+        if (done && t.rx === 0 && t.ry === 0 && Math.abs(t.s - 1) < 0.001) {
+          if (rafRef.current) cancelAnimationFrame(rafRef.current)
+          rafRef.current = null
+        }
+        return { rx, ry, s }
+      })
+      if (rafRef.current !== null) rafRef.current = requestAnimationFrame(loop)
+    }
+    rafRef.current = requestAnimationFrame(loop)
+  }
+
   const onMouseMove = (e) => {
+    if (reducedMotion || !finePointer) return
     const rect = e.currentTarget.getBoundingClientRect()
     const x = e.clientX - rect.left
     const y = e.clientY - rect.top
     const midX = rect.width / 2
     const midY = rect.height / 2
-    const ry = Math.max(-10, Math.min(10, -((x - midX) / midX) * 10))
-    const rx = Math.max(-10, Math.min(10, ((y - midY) / midY) * 10))
-    setTilt({ rx, ry, s: 1.005 })
+    const dx = (x - midX) / midX
+    const dy = (y - midY) / midY
+    const dist = Math.min(1, Math.sqrt(dx*dx + dy*dy))
+    const atten = 0.6 + 0.4 * dist
+    const ry = Math.max(-MAX_ANGLE, Math.min(MAX_ANGLE, -(dx) * MAX_ANGLE * atten))
+    const rx = Math.max(-MAX_ANGLE, Math.min(MAX_ANGLE, (dy) * MAX_ANGLE * atten))
+    targetTiltRef.current = { rx, ry, s: SCALE_ACTIVE }
+    startRaf()
   }
-  const onMouseLeave = () => setTilt({ rx: 0, ry: 0, s: 1 })
+  const onMouseLeave = () => {
+    if (reducedMotion) return
+    targetTiltRef.current = { rx: 0, ry: 0, s: 1 }
+    startRaf()
+  }
 
   const RoboticShell = ({ children }) => (
     <div className="relative min-h-screen overflow-hidden bg-[#070b16] text-cyan-50">
