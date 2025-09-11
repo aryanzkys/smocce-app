@@ -80,14 +80,14 @@ const getDashboardStats = async (req, res) => {
   }
 };
 
-// Get all users with voting status
+// Get all users with voting status (admin-only; includes token)
 const getAllUsers = async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
     const skip = (page - 1) * limit;
 
-    const users = await User.find({}, { token: 0 }) // Hide token for security
+  const users = await User.find({})
       .skip(skip)
       .limit(limit)
       .sort({ nisn: 1 });
@@ -103,6 +103,57 @@ const getAllUsers = async (req, res) => {
         hasPrev: page > 1
       }
     });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Update a user (currently allows updating 'bidang' only)
+const updateUser = async (req, res) => {
+  try {
+    const { nisn } = req.params;
+    const { bidang } = req.body;
+
+    if (!bidang) {
+      return res.status(400).json({ message: 'Field "bidang" is required' });
+    }
+
+    const user = await User.findOne({ nisn });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.bidang = bidang;
+    await user.save();
+
+    res.json({ message: 'User updated successfully', user: {
+      nisn: user.nisn,
+      bidang: user.bidang,
+      hasVoted: user.hasVoted,
+      token: user.token,
+    }});
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+// Delete a user and their votes
+const deleteUser = async (req, res) => {
+  try {
+    const { nisn } = req.params;
+
+    const user = await User.findOne({ nisn });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Delete related votes first
+    await Vote.deleteMany({ nisn });
+    await User.deleteOne({ nisn });
+
+    res.json({ message: 'User and related votes deleted successfully', nisn });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });
@@ -557,5 +608,7 @@ module.exports = {
   exportVotingResultsCSV,
   exportComprehensiveReport,
   bulkImportUsers,
-  regenerateUserToken
+  regenerateUserToken,
+  updateUser,
+  deleteUser
 };

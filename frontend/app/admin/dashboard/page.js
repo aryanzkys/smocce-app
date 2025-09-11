@@ -101,6 +101,8 @@ export default function AdminDashboard() {
   const router = useRouter()
   const [stats, setStats] = useState(null)
   const [users, setUsers] = useState([])
+  const [editingUser, setEditingUser] = useState(null)
+  const [editBidang, setEditBidang] = useState('')
   const [votes, setVotes] = useState([])
   const [results, setResults] = useState(null)
   const [candidates, setCandidates] = useState({ ketua: [], pj: {} })
@@ -253,6 +255,44 @@ export default function AdminDashboard() {
       console.error('Error regenerating token:', error)
       alert('Error regenerating token')
     }
+  }
+
+  const openEditUser = (user) => {
+    setEditingUser(user)
+    setEditBidang(user.bidang || '')
+  }
+
+  const saveUserEdit = async () => {
+    if (!editingUser) return
+    try {
+      const res = await withBusy(() => fetch(`/api/admin/users/${editingUser.nisn}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...authHeaders() },
+        body: JSON.stringify({ bidang: editBidang })
+      }), 'Saving user...')
+      if (res.ok) {
+        setEditingUser(null)
+        setEditBidang('')
+        fetchData()
+      } else {
+        const data = await res.json(); alert('Gagal update user: ' + (data.message || 'Unknown error'))
+      }
+    } catch (e) { alert('Error updating user') }
+  }
+
+  const deleteUser = async (nisn) => {
+    if (!confirm(`Hapus user ${nisn}? Tindakan ini juga akan menghapus suara terkait.`)) return
+    try {
+      const res = await withBusy(() => fetch(`/api/admin/users/${nisn}`, {
+        method: 'DELETE',
+        headers: authHeaders(),
+      }), 'Deleting user...')
+      if (res.ok) {
+        fetchData()
+      } else {
+        alert('Gagal menghapus user')
+      }
+    } catch (e) { alert('Error menghapus user') }
   }
 
   const handleFileUpload = (event) => {
@@ -654,6 +694,7 @@ export default function AdminDashboard() {
                     <tr>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">NISN</th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Bidang</th>
+                      <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Token</th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Status</th>
                       <th className="px-6 py-3 text-left text-xs font-semibold text-slate-300 uppercase tracking-wider">Actions</th>
                     </tr>
@@ -663,6 +704,7 @@ export default function AdminDashboard() {
                       <tr key={user.nisn} className="hover:bg-slate-800/40">
                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-slate-100">{user.nisn}</td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-300">{user.bidang}</td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-slate-300">{user.token || '-'}</td>
                         <td className="px-6 py-4 whitespace-nowrap">
                           <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
                             user.hasVoted 
@@ -687,6 +729,18 @@ export default function AdminDashboard() {
                               className="text-cyan-400 hover:text-cyan-300"
                             >
                               Regenerate Token
+                            </button>
+                            <button
+                              onClick={() => openEditUser(user)}
+                              className="text-amber-400 hover:text-amber-300"
+                            >
+                              Edit
+                            </button>
+                            <button
+                              onClick={() => deleteUser(user.nisn)}
+                              className="text-rose-400 hover:text-rose-300"
+                            >
+                              Hapus
                             </button>
                           </div>
                         </td>
@@ -1246,6 +1300,41 @@ export default function AdminDashboard() {
                 >
                   Simpan Perubahan
                 </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Modal */}
+      {editingUser && (
+        <div className="fixed inset-0 bg-black/60 overflow-y-auto h-full w-full z-50">
+          <div className="relative top-24 mx-auto p-5 border border-slate-800 w-96 shadow-xl rounded-lg bg-slate-900/95 backdrop-blur">
+            <div className="mt-2">
+              <h3 className="text-lg font-semibold text-slate-100 mb-4">Edit User {editingUser.nisn}</h3>
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-300 mb-2">Bidang</label>
+                  <select
+                    value={editBidang}
+                    onChange={e => setEditBidang(e.target.value)}
+                    className="w-full px-3 py-2 bg-slate-800 border border-slate-700 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 text-slate-100"
+                  >
+                    <option value="Matematika">Matematika</option>
+                    <option value="Fisika">Fisika</option>
+                    <option value="Kimia">Kimia</option>
+                    <option value="Biologi">Biologi</option>
+                    <option value="Ekonomi">Ekonomi</option>
+                    <option value="Astronomi">Astronomi</option>
+                    <option value="Kebumian">Kebumian</option>
+                    <option value="Geografi">Geografi</option>
+                    <option value="Informatika">Informatika</option>
+                  </select>
+                </div>
+              </div>
+              <div className="flex justify-end space-x-3 mt-6">
+                <button onClick={() => setEditingUser(null)} className="px-4 py-2 text-sm font-medium text-slate-200 bg-slate-800 rounded-md hover:bg-slate-700 border border-slate-700">Batal</button>
+                <button onClick={saveUserEdit} className="px-4 py-2 text-sm font-medium text-white bg-cyan-600 rounded-md hover:bg-cyan-500">Simpan</button>
               </div>
             </div>
           </div>

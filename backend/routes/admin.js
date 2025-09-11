@@ -11,7 +11,9 @@ const {
   exportVotingResultsCSV,
   exportComprehensiveReport,
   bulkImportUsers,
-  regenerateUserToken
+  regenerateUserToken,
+  updateUser,
+  deleteUser
 } = require('../controllers/adminController');
 const { verifyAdmin } = require('../middleware/auth');
 
@@ -33,6 +35,8 @@ router.get('/stats', verifyAdmin, getDashboardStats);
 
 // User management
 router.get('/users', verifyAdmin, getAllUsers);
+router.put('/users/:nisn', verifyAdmin, updateUser);
+router.delete('/users/:nisn', verifyAdmin, deleteUser);
 
 // Vote management
 router.get('/votes', verifyAdmin, getAllVotes);
