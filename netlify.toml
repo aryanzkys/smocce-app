@@ -1,23 +1,25 @@
 # Netlify configuration for SMOCCE 2025
 
 [build]
-  base = "."
-  command = "npm run build:all"
-  publish = "frontend/.next"
+  # Point Netlify at the Next.js app in the monorepo
+  base = "frontend"
+  command = "npm run build"
+  publish = ".next"
 
 [build.environment]
   NODE_VERSION = "18"
 
 
 [functions]
-  directory = "netlify/functions"
+  # Functions live at repo-root/netlify/functions; base is frontend
+  directory = "../netlify/functions"
   node_bundler = "esbuild"
-  included_files = ["backend/**"]
+  included_files = ["../backend/**"]
 
 # Redirect API to serverless function
 [[redirects]]
   from = "/api/*"
-  to = "/.netlify/functions/api/api/:splat"
+  to = "/.netlify/functions/api/:splat"
   status = 200
 
 # Next.js handles routing; no SPA fallback needed
