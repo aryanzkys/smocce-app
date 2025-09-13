@@ -95,16 +95,16 @@ export default function AnnouncementPage() {
   // Multi-source logo fallback chain (local -> SVG/PNG -> Google Drive direct links -> default avatar)
   const DRIVE_ID = '1RXSDDt84hnJVaOxh-EiLSB6kIe5lw5P-'
   const logoSources = useMemo(() => [
-    // Prefer Google Drive direct link first (as provided)
+    // Local public asset we just downloaded (most reliable on Netlify)
+    '/smocce-logo.jpg?v=4',
+    '/smocce-logo.png?v=4',
+    '/smocce-logo.svg?v=4',
+    // Remote fallbacks
     `https://drive.google.com/uc?export=download&id=${DRIVE_ID}`,
     `https://drive.google.com/uc?id=${DRIVE_ID}&export=download`,
     `https://drive.usercontent.google.com/download?id=${DRIVE_ID}&export=download`,
-    // Then local public assets
-    '/smocce-logo.jpg?v=3',
-    '/smocce-logo.png?v=3',
-    '/smocce-logo.svg?v=3',
-    // Fallback
-    '/default-avatar.jpg?v=3'
+    // Final fallback
+    '/default-avatar.jpg?v=4'
   ], [])
   const [logoIdx, setLogoIdx] = useState(0)
   const logoSrc = logoSources[Math.min(logoIdx, logoSources.length - 1)]
