@@ -92,7 +92,8 @@ function Countdown({ days, hours, minutes, seconds }) {
 
 export default function AnnouncementPage() {
   const { days, hours, minutes, seconds, completed } = useCountdown(TARGET_ISO)
-  const [logoSrc, setLogoSrc] = useState('/smocce-logo.jpg')
+  // Use cache-busting query to avoid stale asset and force unoptimized load
+  const [logoSrc, setLogoSrc] = useState('/smocce-logo.jpg?v=1')
 
   return (
     <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#030712]">
@@ -110,21 +111,23 @@ export default function AnnouncementPage() {
           {/* Neon circular logo */}
           <div className="group relative mx-auto mb-5 h-24 w-24 md:h-28 md:w-28 rounded-full transition-transform duration-300 hover:scale-105">
             {/* outer glow */}
-            <div className="pointer-events-none absolute -inset-2 rounded-full opacity-50 group-hover:opacity-70 transition"
+            <div className="pointer-events-none absolute -inset-2 rounded-full opacity-50 group-hover:opacity-70 transition z-0"
                  style={{ background: 'radial-gradient(circle, rgba(0,229,255,0.25), transparent 60%)' }} />
             {/* inner frame */}
-            <div className="absolute inset-0 rounded-full border border-cyan-300/40 bg-slate-900/50 backdrop-blur-md shadow-[0_0_35px_rgba(0,229,255,0.35)]" />
+            <div className="absolute inset-0 rounded-full border border-cyan-300/40 bg-slate-900/50 backdrop-blur-md shadow-[0_0_35px_rgba(0,229,255,0.35)] z-0" />
             {/* ring accent */}
-            <div className="absolute inset-0 rounded-full ring-2 ring-cyan-300/30 group-hover:ring-cyan-200/60 transition" />
+            <div className="absolute inset-0 rounded-full ring-2 ring-cyan-300/30 group-hover:ring-cyan-200/60 transition z-0" />
             <Image
               src={logoSrc}
               alt="Logo SMANESI Olympiad Club"
               width={128}
               height={128}
-              className="relative z-10 h-full w-full rounded-full object-cover p-2 select-none"
+              className="relative z-10 h-full w-full rounded-full object-contain bg-slate-900/40 select-none"
+              sizes="(max-width: 768px) 96px, 128px"
               priority
               draggable={false}
-              onError={() => setLogoSrc('/default-avatar.jpg')}
+              unoptimized
+              onError={() => setLogoSrc('/default-avatar.jpg?v=1')}
             />
           </div>
           <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight" style={{ color: '#E6FFFB', textShadow: '0 0 15px rgba(0,229,255,0.35)' }}>

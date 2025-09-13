@@ -1,6 +1,6 @@
 'use client'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { Sparkles } from '@react-three/drei'
+import { Stars } from '@react-three/drei'
 import { useEffect, useMemo, useRef } from 'react'
 
 function randomSpherePositions(count = 1500, radius = 20) {
@@ -82,10 +82,11 @@ function Scene() {
     <group ref={rig}>
       <color attach="background" args={[ '#070314' ]} />
       <ambientLight intensity={0.2} />
-      <StarLayer count={1800} radius={28} color="#CFE8FF" size={0.05} rotateSpeed={0.015} />
-      <StarLayer count={1200} radius={18} color="#9AC6FF" size={0.06} rotateSpeed={-0.02} />
-      <Sparkles count={250} speed={0.4} size={2.5} scale={[40, 40, 40]} color="#88CCFF" opacity={0.6} />
-      <Sparkles count={120} speed={0.25} size={3.5} scale={[30, 30, 30]} color="#FFE6AA" opacity={0.35} />
+  {/* Dense round stars cloud */}
+  <StarLayer count={1800} radius={28} color="#CFE8FF" size={0.05} rotateSpeed={0.015} />
+  <StarLayer count={1200} radius={18} color="#9AC6FF" size={0.06} rotateSpeed={-0.02} />
+  {/* A thin distant stars layer using drei Stars (perfectly circular points) */}
+  <Stars radius={50} depth={25} count={1000} factor={2} saturation={0} fade speed={0.4} />
     </group>
   )
 }
