@@ -95,13 +95,16 @@ export default function AnnouncementPage() {
   // Multi-source logo fallback chain (local -> SVG/PNG -> Google Drive direct links -> default avatar)
   const DRIVE_ID = '1RXSDDt84hnJVaOxh-EiLSB6kIe5lw5P-'
   const logoSources = useMemo(() => [
-    '/smocce-logo.jpg?v=2',
-    '/smocce-logo.png?v=2',
-    '/smocce-logo.svg?v=2',
+    // Prefer Google Drive direct link first (as provided)
     `https://drive.google.com/uc?export=download&id=${DRIVE_ID}`,
     `https://drive.google.com/uc?id=${DRIVE_ID}&export=download`,
     `https://drive.usercontent.google.com/download?id=${DRIVE_ID}&export=download`,
-    '/default-avatar.jpg?v=2'
+    // Then local public assets
+    '/smocce-logo.jpg?v=3',
+    '/smocce-logo.png?v=3',
+    '/smocce-logo.svg?v=3',
+    // Fallback
+    '/default-avatar.jpg?v=3'
   ], [])
   const [logoIdx, setLogoIdx] = useState(0)
   const logoSrc = logoSources[Math.min(logoIdx, logoSources.length - 1)]
@@ -122,12 +125,12 @@ export default function AnnouncementPage() {
           {/* Neon circular logo */}
           <div className="group relative mx-auto mb-5 h-24 w-24 md:h-28 md:w-28 rounded-full transition-transform duration-300 hover:scale-105">
             {/* outer glow */}
-            <div className="pointer-events-none absolute -inset-2 rounded-full opacity-50 group-hover:opacity-70 transition z-0"
+            <div className="pointer-events-none absolute -inset-2 rounded-full opacity-50 group-hover:opacity-70 transition -z-10" aria-hidden
                  style={{ background: 'radial-gradient(circle, rgba(0,229,255,0.25), transparent 60%)' }} />
             {/* inner frame */}
-            <div className="absolute inset-0 rounded-full border border-cyan-300/40 bg-slate-900/50 backdrop-blur-md shadow-[0_0_35px_rgba(0,229,255,0.35)] z-0" />
+            <div className="absolute inset-0 rounded-full border border-cyan-300/40 bg-slate-900/50 backdrop-blur-md shadow-[0_0_35px_rgba(0,229,255,0.35)] -z-10" aria-hidden />
             {/* ring accent */}
-            <div className="absolute inset-0 rounded-full ring-2 ring-cyan-300/30 group-hover:ring-cyan-200/60 transition z-0" />
+            <div className="absolute inset-0 rounded-full ring-2 ring-cyan-300/30 group-hover:ring-cyan-200/60 transition -z-10" aria-hidden />
             <img
               src={logoSrc}
               alt="Logo SMANESI Olympiad Club"
