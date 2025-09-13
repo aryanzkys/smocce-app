@@ -92,7 +92,13 @@ function Scene() {
 
 export default function GalaxyBackground() {
   return (
-    <Canvas camera={{ position: [0, 0, 8], fov: 60 }} dpr={[1, 2]} gl={{ antialias: true }}>
+    <Canvas
+      className="absolute inset-0 w-full h-full"
+      style={{ width: '100%', height: '100%', position: 'absolute', inset: 0 }}
+      camera={{ position: [0, 0, 8], fov: 60 }}
+      dpr={[1, 2]}
+      gl={{ antialias: true }}
+    >
       <Scene />
     </Canvas>
   )

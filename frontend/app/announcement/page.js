@@ -96,8 +96,8 @@ export default function AnnouncementPage() {
 
   return (
     <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#030712]">
-      {/* 3D galaxy background */}
-      <div className="absolute inset-0 -z-10 pointer-events-none">
+  {/* 3D galaxy background */}
+  <div className="absolute inset-0 z-0 pointer-events-none">
         <GalaxyBackground />
       </div>
 
@@ -105,7 +105,7 @@ export default function AnnouncementPage() {
   <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(12,30,60,0.10),transparent_65%),linear-gradient(to_bottom,rgba(10,25,47,0.35),rgba(3,7,18,0.6))]" />
 
       {/* Content */}
-      <main className="relative mx-auto flex max-w-6xl flex-col items-center px-4 py-10 md:py-16">
+  <main className="relative z-10 mx-auto flex max-w-6xl flex-col items-center px-4 py-10 md:py-16">
         <header className="mb-10 md:mb-14 text-center">
           {/* Neon circular logo */}
           <div className="group relative mx-auto mb-5 h-24 w-24 md:h-28 md:w-28 rounded-full transition-transform duration-300 hover:scale-105">
