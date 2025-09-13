@@ -107,7 +107,36 @@ export default function AnnouncementPage() {
     '/default-avatar.jpg?v=4'
   ], [])
   const [logoIdx, setLogoIdx] = useState(0)
-  const logoSrc = logoSources[Math.min(logoIdx, logoSources.length - 1)]
+  const [resolvedLogo, setResolvedLogo] = useState(logoSources[0])
+  const [logoLoaded, setLogoLoaded] = useState(false)
+
+  useEffect(() => {
+    let cancelled = false
+    async function pickFirstWorking() {
+      for (let i = 0; i < logoSources.length; i++) {
+        const src = logoSources[i]
+        const ok = await new Promise((resolve) => {
+          const img = new Image()
+          img.onload = () => resolve(true)
+          img.onerror = () => resolve(false)
+          img.src = src
+        })
+        if (cancelled) return
+        if (ok) {
+          setLogoIdx(i)
+          setResolvedLogo(src)
+          setLogoLoaded(true)
+          return
+        }
+      }
+      // fallback last
+  setLogoIdx(logoSources.length - 1)
+  setResolvedLogo(logoSources[logoSources.length - 1])
+  setLogoLoaded(true)
+    }
+    pickFirstWorking()
+    return () => { cancelled = true }
+  }, [logoSources])
 
   return (
     <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#030712]">
@@ -131,16 +160,33 @@ export default function AnnouncementPage() {
             <div className="absolute inset-0 rounded-full border border-cyan-300/40 bg-slate-900/50 backdrop-blur-md shadow-[0_0_35px_rgba(0,229,255,0.35)] -z-10" aria-hidden />
             {/* ring accent */}
             <div className="absolute inset-0 rounded-full ring-2 ring-cyan-300/30 group-hover:ring-cyan-200/60 transition -z-10" aria-hidden />
+            {/* logo image with pre-resolved src and a skeleton fallback */}
             <img
-              src={logoSrc}
+              src={resolvedLogo}
               alt="Logo SMANESI Olympiad Club"
               width={128}
               height={128}
               className="relative z-10 h-full w-full rounded-full object-contain bg-slate-900/40 select-none"
               draggable={false}
               crossOrigin="anonymous"
-              onError={() => setLogoIdx((i) => i + 1)}
+              loading="eager"
+              decoding="async"
+              fetchPriority="high"
+              style={{ display: 'block' }}
+              onLoad={() => setLogoLoaded(true)}
+              onError={() => {
+                setLogoLoaded(false)
+                setLogoIdx((i) => {
+                  const next = Math.min(i + 1, logoSources.length - 1)
+                  setResolvedLogo(logoSources[next])
+                  return next
+                })
+              }}
+              key={resolvedLogo}
             />
+            {!logoLoaded && (
+              <div className="absolute inset-0 -z-10 rounded-full bg-slate-800/60 animate-pulse" aria-hidden />
+            )}
           </div>
           <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight" style={{ color: '#E6FFFB', textShadow: '0 0 15px rgba(0,229,255,0.35)' }}>
             Pengumuman SMOCCE 2025
