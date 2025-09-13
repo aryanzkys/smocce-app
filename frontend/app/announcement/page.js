@@ -165,7 +165,7 @@ export default function AnnouncementPage() {
             Pengumuman SMOCCE 2025
           </h1>
           <p className="mt-2 text-sm md:text-base text-cyan-100/80">
-            Hitung mundur menuju pengumuman besar pada 19 September 2025
+            Hitung mundur menuju pengumuman SMOCCE 2025 pada 19 September 2025
           </p>
         </header>
 
@@ -185,41 +185,22 @@ export default function AnnouncementPage() {
             ) : (
               <>
                 <span className="i-mdi-lock-outline" />
-                Terkunci hingga selesai
+                Tungguinn yakk gaiss!
               </>
             )}
           </Link>
         </div>
 
-        {/* Placeholder navigation to subpages */}
-        <nav aria-label="Sub pages" className="w-full">
-          <ul className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 md:gap-4">
-            <li>
-              <Link className="block rounded-lg border border-cyan-300/20 bg-slate-900/30 px-4 py-3 text-cyan-100/90 hover:bg-slate-900/50 hover:border-cyan-300/40 transition" href="/announcement/buka-pengumuman">Buka Pengumuman</Link>
-            </li>
-            <li>
-              <Link className="block rounded-lg border border-cyan-300/20 bg-slate-900/30 px-4 py-3 text-cyan-100/90 hover:bg-slate-900/50 hover:border-cyan-300/40 transition" href="/announcement/kepengurusan-baru">Kami Persembahkan Kepengurusan Baru</Link>
-            </li>
-            <li>
-              <Link className="block rounded-lg border border-cyan-300/20 bg-slate-900/30 px-4 py-3 text-cyan-100/90 hover:bg-slate-900/50 hover:border-cyan-300/40 transition" href="/announcement/ketua">Mempersembahkan Ketua</Link>
-            </li>
-            <li>
-              <Link className="block rounded-lg border border-cyan-300/20 bg-slate-900/30 px-4 py-3 text-cyan-100/90 hover:bg-slate-900/50 hover:border-cyan-300/40 transition" href="/announcement/wakil-ketua">Memperkenalkan Wakil Ketua</Link>
-            </li>
-            <li>
-              <Link className="block rounded-lg border border-cyan-300/20 bg-slate-900/30 px-4 py-3 text-cyan-100/90 hover:bg-slate-900/50 hover:border-cyan-300/40 transition" href="/announcement/bendahara">Memperkenalkan Bendahara</Link>
-            </li>
-            <li>
-              <Link className="block rounded-lg border border-cyan-300/20 bg-slate-900/30 px-4 py-3 text-cyan-100/90 hover:bg-slate-900/50 hover:border-cyan-300/40 transition" href="/announcement/sekretaris">Memperkenalkan Sekretaris</Link>
-            </li>
-            <li>
-              <Link className="block rounded-lg border border-cyan-300/20 bg-slate-900/30 px-4 py-3 text-cyan-100/90 hover:bg-slate-900/50 hover:border-cyan-300/40 transition" href="/announcement/public-relation-officers">Memperkenalkan PRO 1 & 2</Link>
-            </li>
-            <li>
-              <Link className="block rounded-lg border border-cyan-300/20 bg-slate-900/30 px-4 py-3 text-cyan-100/90 hover:bg-slate-900/50 hover:border-cyan-300/40 transition" href="/announcement/pj-mapel">Memperkenalkan 9 PJ Mapel</Link>
-            </li>
-          </ul>
-        </nav>
+        {/* Neon footer */}
+        <footer className="mt-8 w-full">
+          <div className="relative overflow-hidden rounded-xl border border-cyan-400/20 bg-slate-900/40 p-4 text-center">
+            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_-10%,rgba(0,229,255,0.15),transparent_55%)]" />
+            <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-cyan-300/50 to-transparent" />
+            <p className="relative text-cyan-100/90 text-xs md:text-sm tracking-wide select-none">
+              © 2025 SMANESI Olympiad Club
+            </p>
+          </div>
+        </footer>
       </main>
     </div>
   )
