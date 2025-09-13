@@ -2,6 +2,7 @@
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Stars } from '@react-three/drei'
 import { useEffect, useMemo, useRef } from 'react'
+import * as THREE from 'three'
 
 function randomSpherePositions(count = 1500, radius = 20) {
   const positions = new Float32Array(count * 3)
@@ -23,6 +24,28 @@ function StarLayer({ count = 1500, radius = 24, color = '#BFDFFF', size = 0.04, 
   const group = useRef()
   const positions = useMemo(() => randomSpherePositions(count, radius), [count, radius])
   const materialRef = useRef()
+  // Create a circular sprite texture so points render as round stars, not squares
+  const circleTexture = useMemo(() => {
+    const dim = 64
+    const canvas = document.createElement('canvas')
+    canvas.width = dim
+    canvas.height = dim
+    const ctx = canvas.getContext('2d')
+    const g = ctx.createRadialGradient(dim/2, dim/2, 0, dim/2, dim/2, dim/2)
+    g.addColorStop(0.0, 'rgba(255,255,255,1.0)')
+    g.addColorStop(0.5, 'rgba(255,255,255,0.6)')
+    g.addColorStop(1.0, 'rgba(255,255,255,0.0)')
+    ctx.fillStyle = g
+    ctx.beginPath()
+    ctx.arc(dim/2, dim/2, dim/2, 0, Math.PI * 2)
+    ctx.fill()
+    const tex = new THREE.CanvasTexture(canvas)
+    tex.needsUpdate = true
+    tex.minFilter = THREE.LinearMipMapLinearFilter
+    tex.magFilter = THREE.LinearFilter
+    tex.wrapS = tex.wrapT = THREE.ClampToEdgeWrapping
+    return tex
+  }, [])
 
   useFrame((state, delta) => {
     if (group.current) {
@@ -43,7 +66,17 @@ function StarLayer({ count = 1500, radius = 24, color = '#BFDFFF', size = 0.04, 
         <bufferGeometry>
           <bufferAttribute attach="attributes-position" array={positions} count={positions.length / 3} itemSize={3} />
         </bufferGeometry>
-        <pointsMaterial ref={materialRef} color={color} size={size} sizeAttenuation transparent opacity={0.9} depthWrite={false} />
+        <pointsMaterial
+          ref={materialRef}
+          color={color}
+          size={size}
+          sizeAttenuation
+          transparent
+          opacity={0.95}
+          depthWrite={false}
+          map={circleTexture}
+          alphaTest={0.3}
+        />
       </points>
     </group>
   )

@@ -1,7 +1,7 @@
 'use client'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
-import Image from 'next/image'
+// Using native <img> to guarantee compatibility on Netlify for local assets
 import gsap from 'gsap'
 import GalaxyBackground from './_shared/GalaxyBackground'
 
@@ -117,16 +117,13 @@ export default function AnnouncementPage() {
             <div className="absolute inset-0 rounded-full border border-cyan-300/40 bg-slate-900/50 backdrop-blur-md shadow-[0_0_35px_rgba(0,229,255,0.35)] z-0" />
             {/* ring accent */}
             <div className="absolute inset-0 rounded-full ring-2 ring-cyan-300/30 group-hover:ring-cyan-200/60 transition z-0" />
-            <Image
+            <img
               src={logoSrc}
               alt="Logo SMANESI Olympiad Club"
               width={128}
               height={128}
               className="relative z-10 h-full w-full rounded-full object-contain bg-slate-900/40 select-none"
-              sizes="(max-width: 768px) 96px, 128px"
-              priority
               draggable={false}
-              unoptimized
               onError={() => setLogoSrc('/default-avatar.jpg?v=1')}
             />
           </div>
