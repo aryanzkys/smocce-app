@@ -92,8 +92,19 @@ function Countdown({ days, hours, minutes, seconds }) {
 
 export default function AnnouncementPage() {
   const { days, hours, minutes, seconds, completed } = useCountdown(TARGET_ISO)
-  // Use cache-busting query to avoid stale asset and force unoptimized load
-  const [logoSrc, setLogoSrc] = useState('/smocce-logo.jpg?v=1')
+  // Multi-source logo fallback chain (local -> SVG/PNG -> Google Drive direct links -> default avatar)
+  const DRIVE_ID = '1RXSDDt84hnJVaOxh-EiLSB6kIe5lw5P-'
+  const logoSources = useMemo(() => [
+    '/smocce-logo.jpg?v=2',
+    '/smocce-logo.png?v=2',
+    '/smocce-logo.svg?v=2',
+    `https://drive.google.com/uc?export=download&id=${DRIVE_ID}`,
+    `https://drive.google.com/uc?id=${DRIVE_ID}&export=download`,
+    `https://drive.usercontent.google.com/download?id=${DRIVE_ID}&export=download`,
+    '/default-avatar.jpg?v=2'
+  ], [])
+  const [logoIdx, setLogoIdx] = useState(0)
+  const logoSrc = logoSources[Math.min(logoIdx, logoSources.length - 1)]
 
   return (
     <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#030712]">
@@ -124,7 +135,8 @@ export default function AnnouncementPage() {
               height={128}
               className="relative z-10 h-full w-full rounded-full object-contain bg-slate-900/40 select-none"
               draggable={false}
-              onError={() => setLogoSrc('/default-avatar.jpg?v=1')}
+              crossOrigin="anonymous"
+              onError={() => setLogoIdx((i) => i + 1)}
             />
           </div>
           <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight" style={{ color: '#E6FFFB', textShadow: '0 0 15px rgba(0,229,255,0.35)' }}>
