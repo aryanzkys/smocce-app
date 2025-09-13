@@ -1,7 +1,7 @@
 'use client'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { Sparkles } from '@react-three/drei'
-import { useMemo, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
 function randomSpherePositions(count = 1500, radius = 20) {
   const positions = new Float32Array(count * 3)
@@ -51,16 +51,28 @@ function StarLayer({ count = 1500, radius = 24, color = '#BFDFFF', size = 0.04, 
 
 function Scene() {
   const rig = useRef()
-  const { camera, pointer } = useThree()
+  const cameraRef = useRef(null)
+  const pointer = useRef({ x: 0, y: 0 })
 
-  useFrame(() => {
-    // mouse parallax on camera
-    const tx = pointer.x * 0.6
-    const ty = pointer.y * 0.35
+  useEffect(() => {
+    const onMove = (e) => {
+      const x = (e.clientX / window.innerWidth) * 2 - 1
+      const y = (e.clientY / window.innerHeight) * 2 - 1
+      pointer.current.x = x
+      pointer.current.y = -y
+    }
+    window.addEventListener('mousemove', onMove)
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [])
+
+  useFrame(({ camera }) => {
+    // store camera ref once
+    if (!cameraRef.current) cameraRef.current = camera
+    const tx = pointer.current.x * 0.6
+    const ty = pointer.current.y * 0.35
     camera.position.x += (tx - camera.position.x) * 0.05
     camera.position.y += (ty - camera.position.y) * 0.05
     camera.lookAt(0, 0, 0)
-    // slight rig sway
     if (rig.current) {
       rig.current.rotation.z += 0.0008
     }

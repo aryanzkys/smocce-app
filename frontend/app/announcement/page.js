@@ -92,6 +92,7 @@ function Countdown({ days, hours, minutes, seconds }) {
 
 export default function AnnouncementPage() {
   const { days, hours, minutes, seconds, completed } = useCountdown(TARGET_ISO)
+  const [logoSrc, setLogoSrc] = useState('/smocce-logo.jpg')
 
   return (
     <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#030712]">
@@ -100,8 +101,8 @@ export default function AnnouncementPage() {
         <GalaxyBackground />
       </div>
 
-      {/* Subtle vignette */}
-      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(12,30,60,0.15),transparent_60%),linear-gradient(to_bottom,rgba(10,25,47,0.5),rgba(3,7,18,0.9))]" />
+  {/* Subtle vignette (lightened to reveal galaxy) */}
+  <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_center,rgba(12,30,60,0.10),transparent_65%),linear-gradient(to_bottom,rgba(10,25,47,0.35),rgba(3,7,18,0.6))]" />
 
       {/* Content */}
       <main className="relative mx-auto flex max-w-6xl flex-col items-center px-4 py-10 md:py-16">
@@ -116,12 +117,14 @@ export default function AnnouncementPage() {
             {/* ring accent */}
             <div className="absolute inset-0 rounded-full ring-2 ring-cyan-300/30 group-hover:ring-cyan-200/60 transition" />
             <Image
-              src="/smocce-logo.svg"
+              src={logoSrc}
               alt="Logo SMANESI Olympiad Club"
               width={128}
               height={128}
               className="relative z-10 h-full w-full rounded-full object-cover p-2 select-none"
+              priority
               draggable={false}
+              onError={() => setLogoSrc('/default-avatar.jpg')}
             />
           </div>
           <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight" style={{ color: '#E6FFFB', textShadow: '0 0 15px rgba(0,229,255,0.35)' }}>
