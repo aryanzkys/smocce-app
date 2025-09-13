@@ -2,9 +2,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { Float } from '@react-three/drei'
 import gsap from 'gsap'
+import GalaxyBackground from './_shared/GalaxyBackground'
 
 // Target time: 19 September 2025 00:00:00 WIB (UTC+7)
 const TARGET_ISO = '2025-09-19T00:00:00+07:00'
@@ -35,62 +34,7 @@ function calcDiff(targetMs) {
   return { days, hours, minutes, seconds, completed }
 }
 
-function NeonSphere({ color = '#00E5FF', position = [0, 0, 0], scale = 1, speed = 0.2 }) {
-  const ref = useRef()
-  useFrame((_, delta) => {
-    if (!ref.current) return
-    ref.current.rotation.x += delta * speed
-    ref.current.rotation.y += delta * (speed * 0.7)
-  })
-  return (
-    <Float speed={1} floatIntensity={0.8} rotationIntensity={0.25}>
-      <mesh ref={ref} position={position} scale={scale} castShadow receiveShadow>
-        <icosahedronGeometry args={[1, 1]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={1} metalness={0.6} roughness={0.2} />
-      </mesh>
-    </Float>
-  )
-}
-
-function NeonRing({ color = '#7C4DFF', position = [0, 0, 0], scale = 1, speed = 0.3 }) {
-  const ref = useRef()
-  useFrame((_, delta) => {
-    if (!ref.current) return
-    ref.current.rotation.z += delta * speed
-  })
-  return (
-    <Float speed={1} floatIntensity={0.6} rotationIntensity={0.3}>
-      <mesh ref={ref} position={position} scale={scale}>
-        <torusGeometry args={[1.2, 0.03, 32, 128]} />
-        <meshStandardMaterial color={color} emissive={color} emissiveIntensity={1.2} metalness={0.4} roughness={0.1} />
-      </mesh>
-    </Float>
-  )
-}
-
-function NeonGrid() {
-  // Subtle floor grid
-  return (
-    <gridHelper args={[40, 40, '#1DE9B6', '#0A192F']} position={[0, -2.5, 0]} />
-  )
-}
-
-function TechBackground() {
-  return (
-    <Canvas camera={{ position: [0, 0, 9], fov: 60 }} dpr={[1, 2]} gl={{ antialias: true }}>
-      <color attach="background" args={[ '#030712' ]} />
-      <ambientLight intensity={0.4} />
-      <pointLight position={[6, 6, 6]} intensity={1.2} color={'#00E5FF'} />
-      <pointLight position={[-6, -4, -4]} intensity={0.8} color={'#7C4DFF'} />
-      <NeonGrid />
-      {/* Floating techno shapes */}
-      <NeonSphere color="#00E5FF" position={[-4, 1.2, -2]} scale={1.1} speed={0.25} />
-      <NeonSphere color="#1DE9B6" position={[3.2, -0.6, -1.5]} scale={0.9} speed={0.18} />
-      <NeonRing color="#7C4DFF" position={[0.2, 2.2, -2]} scale={1.1} speed={0.36} />
-      <NeonRing color="#00E5FF" position={[-2.5, -1.8, -1.2]} scale={0.9} speed={0.28} />
-    </Canvas>
-  )
-}
+// Tech background replaced by GalaxyBackground component
 
 function FlipCard({ value, label }) {
   const [display, setDisplay] = useState(value)
@@ -151,9 +95,9 @@ export default function AnnouncementPage() {
 
   return (
     <div className="relative min-h-[100dvh] w-full overflow-hidden bg-[#030712]">
-      {/* 3D background */}
+      {/* 3D galaxy background */}
       <div className="absolute inset-0 -z-10 pointer-events-none">
-        <TechBackground />
+        <GalaxyBackground />
       </div>
 
       {/* Subtle vignette */}
@@ -172,7 +116,7 @@ export default function AnnouncementPage() {
             {/* ring accent */}
             <div className="absolute inset-0 rounded-full ring-2 ring-cyan-300/30 group-hover:ring-cyan-200/60 transition" />
             <Image
-              src="https://drive.google.com/uc?export=view&id=1RXSDDt84hnJVaOxh-EiLSB6kIe5lw5P-"
+              src="/smocce-logo.svg"
               alt="Logo SMANESI Olympiad Club"
               width={128}
               height={128}
