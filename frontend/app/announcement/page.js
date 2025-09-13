@@ -1,6 +1,7 @@
 'use client'
 import { useEffect, useMemo, useRef, useState } from 'react'
 import Link from 'next/link'
+import Image from 'next/image'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { Float } from '@react-three/drei'
 import gsap from 'gsap'
@@ -161,6 +162,24 @@ export default function AnnouncementPage() {
       {/* Content */}
       <main className="relative mx-auto flex max-w-6xl flex-col items-center px-4 py-10 md:py-16">
         <header className="mb-10 md:mb-14 text-center">
+          {/* Neon circular logo */}
+          <div className="group relative mx-auto mb-5 h-24 w-24 md:h-28 md:w-28 rounded-full transition-transform duration-300 hover:scale-105">
+            {/* outer glow */}
+            <div className="pointer-events-none absolute -inset-2 rounded-full opacity-50 group-hover:opacity-70 transition"
+                 style={{ background: 'radial-gradient(circle, rgba(0,229,255,0.25), transparent 60%)' }} />
+            {/* inner frame */}
+            <div className="absolute inset-0 rounded-full border border-cyan-300/40 bg-slate-900/50 backdrop-blur-md shadow-[0_0_35px_rgba(0,229,255,0.35)]" />
+            {/* ring accent */}
+            <div className="absolute inset-0 rounded-full ring-2 ring-cyan-300/30 group-hover:ring-cyan-200/60 transition" />
+            <Image
+              src="https://drive.google.com/uc?export=view&id=1RXSDDt84hnJVaOxh-EiLSB6kIe5lw5P-"
+              alt="Logo SMANESI Olympiad Club"
+              width={128}
+              height={128}
+              className="relative z-10 h-full w-full rounded-full object-cover p-2 select-none"
+              draggable={false}
+            />
+          </div>
           <h1 className="text-2xl md:text-4xl font-extrabold tracking-tight" style={{ color: '#E6FFFB', textShadow: '0 0 15px rgba(0,229,255,0.35)' }}>
             Pengumuman SMOCCE 2025
           </h1>
